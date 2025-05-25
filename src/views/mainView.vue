@@ -34,66 +34,85 @@ export default {
 	data() {
 		return {
 			timer: {
-				value: 0,
+				startTime: null,
+				passedTime: null,
 				running: false,
 				display: "00:00",
 				finished: false
 			},
+			intervalId: null
 		}
 	},
 	methods: {
 		changeTimerFormat() {
-			let seconds = Math.floor(this.timer.value % 60)
-			let minutes = Math.floor(this.timer.value / 60)
-			let seconds_string = seconds
-			let minutes_string = minutes
+			if (!this.timer.startTime) return;
 
-			if (seconds <= 9) {
-				seconds_string = "0" + seconds
-			}
-
-			if (minutes <= 9) {
-				minutes_string = "0" + minutes
-			}
-
-			this.timer.display = minutes_string + ":" + seconds_string
+			let passed = Math.floor((Date.now() - this.timer.startTime) / 1000);
+			let minutes = String(Math.floor(passed / 60)).padStart(2, '0');
+			let seconds = String(passed % 60).padStart(2, '0');
+			this.timer.display = `${minutes}:${seconds}`;
 		},
 
 		startTimer() {
-			if(!this.timer.running) {
-				this.timer.running = true
-				this.timer.object = setInterval(() => {
-					this.timer.value++
-					this.changeTimerFormat()
-				}, 1000);
-			}
+			if(this.timer.running) return
+
+			this.timer.running = true
+			this.timer.startTime = Date.now()
+
+			localStorage.setItem('timerStartTime', this.timer.startTime);
+			localStorage.setItem('timerRunning', 'true');
+
+			this.intervalId = setInterval(() => {
+				this.changeTimerFormat();
+			}, 1000);
+
+
+			this.changeTimerFormat()
+
 		},
 
 		pauseTimer() {
 			this.timer.running = false
-			clearInterval(this.timer.object);
+			clearInterval(this.intervalId)
 		},
 
 		resetTimer() {
-			this.timer.running = false
-			clearInterval(this.timer.object);
-			this.timer.value = 0
-			this.changeTimerFormat();
+			this.pauseTimer();
+			this.timer.startTime = null;
+			this.timer.display = "00:00";
+			this.timer.finished = false;
+
+			localStorage.removeItem('timerStartTime');
+			localStorage.removeItem('timerRunning');
 		},
 
 		stopTimer() {
-			this.timer.running = false
-			clearInterval(this.timer.object);
-			this.timer.value = 0
-			this.changeTimerFormat();
-			this.timer.finished = true
+			this.pauseTimer();
+			this.timer.finished = true;
+			this.timer.display = "00:00";
+
+			localStorage.removeItem('timerStartTime');
+			localStorage.removeItem('timerRunning');
 		}
 
 	},
 
-	beforeMount() {
-		this.changeTimerFormat()
-		this.resetTimer()
+	mounted() {
+		const savedStartTime = localStorage.getItem('timerStartTime');
+		const wasRunning = localStorage.getItem('timerRunning') === 'true';
+
+		if (savedStartTime && wasRunning) {
+			this.timer.startTime = parseInt(savedStartTime);
+			this.timer.running = true;
+
+			this.intervalId = setInterval(() => {
+				this.changeTimerFormat();
+			}, 1000);
+
+			this.changeTimerFormat();
+		} else {
+			this.resetTimer();
+		}
 	}
 }
 
