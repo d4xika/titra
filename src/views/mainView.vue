@@ -4,14 +4,14 @@
 		<div style="display: flex; justify-content: center; align-items: center; flex-direction: column">
 			<div>
 				<img v-if="this.timer.running" style="height: 200px; margin-bottom: 5px; margin-top: 50px" src="/images/workingKitty.gif" alt="working kitty" />
-				<img v-else style="height: 160px; margin-top: 95px" src="/images/sleepingKitty.GIF" alt="sleeping kitty" />
+				<img v-else style="height: 160px; margin-top: 95px" src="/images/sleepingKitty.gif" alt="sleeping kitty" />
 			</div>
 			<div id="timerBox">
 				<p>{{this.timer.display}}</p>
 			</div>
 		</div>
 		<div style="display: flex; justify-content: center; gap: 7px; margin-top: 7px">
-			<circleButton @click="this.resetTimer" icon="restart"/>
+			<circleButton @click="this.timer.reset = true" icon="restart"/>
 			<circleButton @click="this.pauseTimer" v-if="this.timer.running" icon="pause"/>
 			<circleButton @click="this.startTimer" v-else icon="resume"/>
 			<circleButton @click="this.stopTimer" icon="stop"/>
@@ -19,17 +19,20 @@
 	</div>
 
 	<finishedTimerModal v-if="this.timer.finished" @closeModal="this.timer.finished = false"/>
+	<resetTimerModal v-if="this.timer.reset" @yesReset="this.resetTimer" @closeModal="this.timer.reset = false" @noReset="this.timer.reset = false"/>
 </template>
 
 <script>
 import circleButton from '@/components/buttons/circleButton.vue'
 import finishedTimerModal from '@/modals/finishedTimerModal.vue'
+import resetTimerModal from "@/modals/resetTimerModal.vue";
 
 export default {
 	name: 'mainView',
 	components: {
 		circleButton,
-		finishedTimerModal
+		finishedTimerModal,
+		resetTimerModal
 	},
 	data() {
 		return {
@@ -39,6 +42,7 @@ export default {
 				running: false,
 				display: "00:00",
 				finished: false,
+				reset: false,
 				elapsedBeforePause: 0,
 			},
 			intervalId: null
@@ -85,6 +89,7 @@ export default {
 			this.timer.elapsedBeforePause = 0;
 			this.timer.display = "00:00";
 			this.timer.finished = false;
+			this.timer.reset = false;
 
 			localStorage.removeItem('timerStartTime');
 			localStorage.removeItem('elapsedBeforePause');

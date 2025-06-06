@@ -1,10 +1,13 @@
 <template>
 	<div id="dimmBackground">
 		<div id="modal">
-			<img style="height: 150px; margin-top: -200px" src="/images/happyKitty.gif" alt="happy kitty">
+			<img style="height: 150px; margin-top: -200px" src="/images/sadKitty.gif" alt="sad kitty">
 			<closeButton @click="this.$emit('closeModal')" id="closeButton"/>
-			<p style="margin-top: 10px">Great job!</p>
-			<p style="margin-top: -20px">So proud of you!</p>
+			<p style="margin-top: 10px">Are you sure you want to reset?</p>
+			<div style="display: flex; justify-content: center; flex-direction: row; margin-bottom: 15px; gap: 50px">
+				<div @click="this.$emit('yesReset')" class="choiceButtons">Yes</div>
+				<div @click="this.$emit('noReset')" class="choiceButtons">No</div>
+			</div>
 		</div>
 	</div>
 </template>
@@ -43,6 +46,7 @@ export default {
 	width: 300px;
 	height: 200px;
 	border-radius: 15px;
+	padding: 10px;
 	background-color: #2c3e50;
 }
 
@@ -50,6 +54,19 @@ export default {
 	position: absolute;
 	right: 10px;
 	top: 10px;
+}
+
+.choiceButtons {
+	height: 40px;
+	width: 75px;
+	color: white;
+	align-content: center;
+	background-color: rgba(173, 216, 230, 0.5);
+	border-radius: 5px;
+	font-size: large;
+	font-family: "Chakra Petch", sans-serif;
+	font-weight: 400;
+	font-style: normal;
 }
 
 p {
