@@ -1,144 +1,151 @@
 <template>
 	<div id="background"></div>
 	<div>
-		<div style="display: flex; justify-content: center; align-items: center; flex-direction: column">
-			<div>
-				<img v-if="this.timer.running" style="height: 200px; margin-bottom: 5px; margin-top: 50px" src="/images/workingKitty.gif" alt="working kitty" />
-				<img v-else style="height: 160px; margin-top: 95px" src="/images/sleepingKitty.gif" alt="sleeping kitty" />
+		<div style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 100px">
+			<SelectButton :modelValue="timerSelection" @update:modelValue="handleSelectButtonUpdate" :key="selectButtonKey" :options="['pi pi-stopwatch', 'pi pi-hourglass']">
+				<template #option="slotProps">
+					<i :class="slotProps.option"></i>
+				</template>
+			</SelectButton>
+				<div>
+				<img v-if="timer.running" style="height: 200px; margin-bottom: 5px" src="/images/workingKitty.gif" alt="working kitty"/>
+				<img v-else style="height: 160px; margin-top: 45px" src="/images/sleepingKitty.gif" alt="sleeping kitty"/>
 			</div>
 			<div id="timerBox">
-				<p>{{this.timer.display}}</p>
+				<p v-if="timerSelection === 'pi pi-stopwatch'">{{timer.display}}</p>
+				<input v-else id="inputBox" placeholder="min">
 			</div>
 		</div>
 		<div style="display: flex; justify-content: center; gap: 7px; margin-top: 7px">
-			<circleButton @click="this.timer.reset = true" icon="restart"/>
-			<circleButton @click="this.pauseTimer" v-if="this.timer.running" icon="pause"/>
-			<circleButton @click="this.startTimer" v-else icon="resume"/>
-			<circleButton @click="this.stopTimer" icon="stop"/>
+			<circleButton @click="timer.reset = true" icon="restart"/>
+			<circleButton @click="pauseTimer" v-if="timer.running" icon="pause"/>
+			<circleButton @click="startTimer" v-else icon="resume"/>
+			<circleButton @click="stopTimer" icon="stop"/>
 		</div>
 	</div>
 
-	<finishedTimerModal v-if="this.timer.finished" @closeModal="this.timer.finished = false"/>
-	<resetTimerModal v-if="this.timer.reset" @yesReset="this.resetTimer" @closeModal="this.timer.reset = false" @noReset="this.timer.reset = false"/>
+	<finishedTimerModal v-if="timer.finished" @closeModal="timer.finished = false"/>
+	<resetTimerModal v-if="timer.reset" @yesReset="resetTimer" @closeModal="timer.reset = false" @noReset="timer.reset = false"/>
 </template>
 
-<script>
+<script setup>
+import { ref } from "vue";
 import circleButton from '@/components/buttons/circleButton.vue'
 import finishedTimerModal from '@/modals/finishedTimerModal.vue'
 import resetTimerModal from "@/modals/resetTimerModal.vue";
 
-export default {
-	name: 'mainView',
-	components: {
-		circleButton,
-		finishedTimerModal,
-		resetTimerModal
-	},
-	data() {
-		return {
-			timer: {
-				startTime: null,
-				passedTime: null,
-				running: false,
-				display: "00:00",
-				finished: false,
-				reset: false,
-				elapsedBeforePause: 0,
-			},
-			intervalId: null
-		}
-	},
-	methods: {
-		startTimer() {
-			if (this.timer.running) return;
+const timerSelection = ref("pi pi-stopwatch")
+const selectButtonKey = ref(0)
 
-			const now = Date.now();
+const timer = ref({
+	startTime: null,
+	passedTime: null,
+	running: false,
+	display: "00:00",
+	finished: false,
+	reset: false,
+	elapsedBeforePause: 0
+})
+const intervalId = ref(null);
 
-			this.timer.startTime = now - this.timer.elapsedBeforePause * 1000;
-			this.timer.running = true;
-			this.timer.finished = false;
+function startTimer() {
 
-			localStorage.setItem('timerStartTime', this.timer.startTime);
-			localStorage.setItem('timerRunning', 'true');
-			localStorage.setItem('elapsedBeforePause', this.timer.elapsedBeforePause);
+	if (timer.value.running) return;
 
-			this.intervalId = setInterval(() => {
-				this.updateTimerDisplay();
-			}, 1000);
+	const now = Date.now();
 
-			this.updateTimerDisplay();
-		},
+	timer.value.startTime = now - timer.value.elapsedBeforePause * 1000;
+	timer.value.running = true;
+	timer.value.finished = false;
 
-		pauseTimer() {
-			if (!this.timer.running) return;
+	localStorage.setItem('timerStartTime', timer.value.startTime);
+	localStorage.setItem('timerRunning', 'true');
+	localStorage.setItem('elapsedBeforePause', timer.value.elapsedBeforePause);
 
-			this.timer.running = false;
-			clearInterval(this.intervalId);
+	intervalId.value = setInterval(() => {
+		updateTimerDisplay();
+	}, 1000);
 
-			this.timer.elapsedBeforePause = Math.floor((Date.now() - this.timer.startTime) / 1000);
+	updateTimerDisplay();
+}
 
-			localStorage.setItem('elapsedBeforePause', this.timer.elapsedBeforePause);
-			localStorage.setItem('timerRunning', 'false');
-			localStorage.removeItem('timerStartTime');
-		},
+function pauseTimer() {
+	if (!timer.value.running) return;
 
-		resetTimer() {
-			this.pauseTimer();
+	timer.value.running = false;
+	clearInterval(intervalId);
 
-			this.timer.startTime = null;
-			this.timer.elapsedBeforePause = 0;
-			this.timer.display = "00:00";
-			this.timer.finished = false;
-			this.timer.reset = false;
+	timer.value.elapsedBeforePause = Math.floor((Date.now() - timer.value.startTime) / 1000);
 
-			localStorage.removeItem('timerStartTime');
-			localStorage.removeItem('elapsedBeforePause');
-			localStorage.removeItem('timerRunning');
-		},
+	localStorage.setItem('elapsedBeforePause', timer.value.elapsedBeforePause);
+	localStorage.setItem('timerRunning', 'false');
+	localStorage.removeItem('timerStartTime');
+}
 
-		stopTimer() {
-			this.resetTimer();
-			this.timer.finished = true;
-		},
+function resetTimer() {
+	pauseTimer();
 
-		updateTimerDisplay() {
-			if (this.timer.running && this.timer.startTime) {
-				const elapsed = Math.floor((Date.now() - this.timer.startTime) / 1000);
-				this.timer.elapsedBeforePause = elapsed;
-				this.timer.display = this.formatElapsed(elapsed);
+	timer.value.startTime = null;
+	timer.value.elapsedBeforePause = 0;
+	timer.value.display = "00:00";
+	timer.value.finished = false;
+	timer.value.reset = false;
 
-				localStorage.setItem('elapsedBeforePause', elapsed);
-			}
-		},
+	localStorage.removeItem('timerStartTime');
+	localStorage.removeItem('elapsedBeforePause');
+	localStorage.removeItem('timerRunning');
+}
 
-		formatElapsed(seconds) {
-			const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
-			const secs = String(seconds % 60).padStart(2, '0');
-			return `${mins}:${secs}`;
-		}
-	},
 
-	mounted() {
-		const wasRunning = localStorage.getItem('timerRunning') === 'true';
-		const savedStartTime = localStorage.getItem('timerStartTime');
-		const savedElapsed = localStorage.getItem('elapsedBeforePause');
+function stopTimer() {
+	resetTimer();
+	timer.value.finished = true;
+}
 
-		this.timer.elapsedBeforePause = savedElapsed ? parseInt(savedElapsed) : 0;
 
-		if (wasRunning && savedStartTime) {
-			this.timer.startTime = parseInt(savedStartTime);
-			this.timer.running = true;
+function updateTimerDisplay() {
+	if (timer.value.running && timer.value.startTime) {
+		const elapsed = Math.floor((Date.now() - timer.value.startTime) / 1000);
+		timer.value.elapsedBeforePause = elapsed;
+		timer.value.display = formatElapsed(elapsed);
 
-			this.intervalId = setInterval(() => {
-				this.updateTimerDisplay();
-			}, 1000);
-
-			this.updateTimerDisplay();
-		} else {
-			this.timer.running = false;
-			this.timer.display = this.formatElapsed(this.timer.elapsedBeforePause);
-		}
+		localStorage.setItem('elapsedBeforePause', elapsed);
 	}
+}
+
+
+function formatElapsed(seconds) {
+	const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
+	const secs = String(seconds % 60).padStart(2, '0');
+	return `${mins}:${secs}`;
+}
+
+const wasRunning = localStorage.getItem('timerRunning') === 'true';
+const savedStartTime = localStorage.getItem('timerStartTime');
+const savedElapsed = localStorage.getItem('elapsedBeforePause');
+
+timer.value.elapsedBeforePause = savedElapsed ? parseInt(savedElapsed) : 0;
+
+if (wasRunning && savedStartTime) {
+	timer.value.startTime = parseInt(savedStartTime);
+	timer.value.running = true;
+
+	intervalId.value = setInterval(() => {
+		updateTimerDisplay();
+	}, 1000);
+
+	updateTimerDisplay();
+} else {
+	timer.value.running = false;
+	timer.value.display = formatElapsed(timer.value.elapsedBeforePause);
+}
+
+function handleSelectButtonUpdate(nextVal) {
+	if (!nextVal || nextVal === timerSelection.value) {
+		selectButtonKey.value++
+		return
+	}
+	timerSelection.value = nextVal
 }
 
 </script>
@@ -165,6 +172,29 @@ export default {
 	border-radius: 15px;
 	margin-bottom: 10px;
 	margin-top: 10px;
+}
+
+#inputBox {
+	background-color: #2c3e50;
+	color: lightgrey;
+	font-size: xxx-large;
+	width: 140px;
+	height: 70px;
+	font-family: "Chakra Petch", sans-serif;
+	font-weight: 400;
+	font-style: normal;
+	border: 1px solid lightblue;
+	border-radius: 15px;
+	text-align: center;
+}
+
+#inputBox:focus {
+	outline: none;
+}
+
+input::placeholder {
+	color: rgba(211, 211, 211, 0.9);
+	font-size: x-large;
 }
 
 p {
