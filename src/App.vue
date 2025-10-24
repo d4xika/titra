@@ -1,18 +1,9 @@
 <template>
-	<div>
-		<mainView />
-	</div>
+	<router-view></router-view>
 </template>
 
 <script>
-import mainView from '@/views/mainView.vue';
 
-export default {
-	name: 'App',
-	components: {
-		mainView
-	}
-}
 </script>
 
 <style>
@@ -22,5 +13,8 @@ export default {
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
 	margin-top: 60px;
+}
+body {
+	background-color: lightblue;
 }
 </style>

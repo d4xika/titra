@@ -1,6 +1,6 @@
 {
   "name": "stopwatch",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve",
@@ -14,7 +14,8 @@
     "primeicons": "^7.0.0",
     "primevue": "^4.4.1",
     "register-service-worker": "^1.7.2",
-    "vue": "^3.2.13"
+    "vue": "^3.2.13",
+    "vue-router": "^4.6.3"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

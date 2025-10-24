@@ -1,8 +1,8 @@
 <template>
-	<div id="background"></div>
 	<div>
-		<div style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 100px">
-			<SelectButton :modelValue="timerSelection" @update:modelValue="handleSelectButtonUpdate" :key="selectButtonKey" :options="['pi pi-stopwatch', 'pi pi-hourglass']">
+		<iconButton @click="$router.push('savedSessions')" id="listButton" icon="pi pi-list" />
+		<div style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 120px">
+			<SelectButton :disabled="timer.activeTimer" :modelValue="timerSelection" @update:modelValue="handleSelectButtonUpdate" :key="selectButtonKey" :options="['pi pi-stopwatch', 'pi pi-hourglass']">
 				<template #option="slotProps">
 					<i :class="slotProps.option"></i>
 				</template>
@@ -33,6 +33,7 @@ import { ref } from "vue";
 import circleButton from '@/components/buttons/circleButton.vue'
 import finishedTimerModal from '@/modals/finishedTimerModal.vue'
 import resetTimerModal from "@/modals/resetTimerModal.vue";
+import iconButton from '@/components/buttons/iconButton.vue'
 
 const timerSelection = ref("pi pi-stopwatch")
 const selectButtonKey = ref(0)
@@ -90,6 +91,7 @@ function resetTimer() {
 	timer.value.display = "00:00";
 	timer.value.finished = false;
 	timer.value.reset = false;
+	timer.value.activeTimer = false;
 
 	localStorage.removeItem('timerStartTime');
 	localStorage.removeItem('elapsedBeforePause');
@@ -122,7 +124,6 @@ function updateTimerDisplay() {
 		localStorage.setItem('elapsedBeforePause', elapsed);
 	}
 }
-
 
 function formatElapsed(seconds) {
 	const mins = String(Math.floor(seconds / 60)).padStart(2, '0');
@@ -161,16 +162,6 @@ function handleSelectButtonUpdate(nextVal) {
 </script>
 
 <style scoped>
-
-#background {
-	background-color: lightblue;
-	top: 0;
-	left: 0;
-	z-index: -1;
-	position: fixed;
-	width: 100%;
-	height: 100%;
-}
 
 #timerBox {
 	background-color: #2c3e50;
@@ -213,6 +204,12 @@ p {
 	font-family: "Chakra Petch", sans-serif;
 	font-weight: 400;
 	font-style: normal;
+}
+
+#listButton {
+	position: fixed;
+	left: 30px;
+	top: 30px;
 }
 
 

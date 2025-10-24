@@ -2,23 +2,17 @@
 	<div id="dimmBackground">
 		<div id="modal">
 			<img style="height: 150px; margin-top: -200px" src="/images/happyKitty.gif" alt="happy kitty">
-			<closeButton @click="this.$emit('closeModal')" id="closeButton"/>
+			<closeButton @click="emit('closeModal')" id="closeButton"/>
 			<p style="margin-top: 10px">Great job!</p>
 			<p style="margin-top: -20px">So proud of you!</p>
 		</div>
 	</div>
 </template>
 
-<script>
+<script setup>
+import { defineEmits } from 'vue'
 import closeButton from '@/components/buttons/closeButton.vue'
-
-export default {
-	name: 'finishedTimerModal',
-	components: {
-		closeButton
-	}
-}
-
+const emit = defineEmits(['closeModal'])
 </script>
 
 <style scoped>
