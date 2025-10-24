@@ -12,8 +12,8 @@
 				<img v-else style="height: 160px; margin-top: 45px" src="/images/sleepingKitty.gif" alt="sleeping kitty"/>
 			</div>
 			<div id="timerBox">
-				<p v-if="timerSelection === 'pi pi-stopwatch'">{{timer.display}}</p>
-				<input v-else id="inputBox" placeholder="min">
+				<p v-if="timerSelection === 'pi pi-stopwatch' || timer.running">{{timer.display}}</p>
+				<input v-else-if="timerSelection === 'pi pi-hourglass' && !timer.running" id="inputBox" placeholder="min" v-model="countdownStartTime">
 			</div>
 		</div>
 		<div style="display: flex; justify-content: center; gap: 7px; margin-top: 7px">
@@ -36,6 +36,7 @@ import resetTimerModal from "@/modals/resetTimerModal.vue";
 
 const timerSelection = ref("pi pi-stopwatch")
 const selectButtonKey = ref(0)
+const countdownStartTime = ref(null)
 
 const timer = ref({
 	startTime: null,
@@ -49,9 +50,6 @@ const timer = ref({
 const intervalId = ref(null);
 
 function startTimer() {
-
-	if (timer.value.running) return;
-
 	const now = Date.now();
 
 	timer.value.startTime = now - timer.value.elapsedBeforePause * 1000;
@@ -107,7 +105,16 @@ function updateTimerDisplay() {
 	if (timer.value.running && timer.value.startTime) {
 		const elapsed = Math.floor((Date.now() - timer.value.startTime) / 1000);
 		timer.value.elapsedBeforePause = elapsed;
-		timer.value.display = formatElapsed(elapsed);
+
+		if(timerSelection.value === 'pi pi-hourglass') {
+			const countdown = countdownStartTime.value * 60 - elapsed
+			timer.value.display = formatElapsed(countdown)
+			if(countdown <= 0) {
+				stopTimer()
+			}
+		} else {
+			timer.value.display = formatElapsed(elapsed);
+		}
 
 		localStorage.setItem('elapsedBeforePause', elapsed);
 	}
