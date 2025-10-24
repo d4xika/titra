@@ -12,8 +12,8 @@
 				<img v-else style="height: 160px; margin-top: 45px" src="/images/sleepingKitty.gif" alt="sleeping kitty"/>
 			</div>
 			<div id="timerBox">
-				<p v-if="timerSelection === 'pi pi-stopwatch' || timer.running">{{timer.display}}</p>
-				<input v-else-if="timerSelection === 'pi pi-hourglass' && !timer.running" id="inputBox" placeholder="min" v-model="countdownStartTime">
+				<p v-if="timerSelection === 'pi pi-stopwatch' || timer.activeTimer">{{timer.display}}</p>
+				<input v-else id="inputBox" placeholder="min" v-model="countdownStartTime">
 			</div>
 		</div>
 		<div style="display: flex; justify-content: center; gap: 7px; margin-top: 7px">
@@ -45,7 +45,8 @@ const timer = ref({
 	display: "00:00",
 	finished: false,
 	reset: false,
-	elapsedBeforePause: 0
+	elapsedBeforePause: 0,
+	activeTimer: false
 })
 const intervalId = ref(null);
 
@@ -55,6 +56,7 @@ function startTimer() {
 	timer.value.startTime = now - timer.value.elapsedBeforePause * 1000;
 	timer.value.running = true;
 	timer.value.finished = false;
+	timer.value.activeTimer = true;
 
 	localStorage.setItem('timerStartTime', timer.value.startTime);
 	localStorage.setItem('timerRunning', 'true');
@@ -98,6 +100,7 @@ function resetTimer() {
 function stopTimer() {
 	resetTimer();
 	timer.value.finished = true;
+	timer.value.activeTimer = false;
 }
 
 
