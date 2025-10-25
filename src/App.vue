@@ -8,7 +8,9 @@
 
 <style>
 #app {
-	font-family: Avenir, Helvetica, Arial, sans-serif;
+	font-family: "Chakra Petch", sans-serif !important;
+	font-weight: 400;
+	font-style: normal;
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
 	text-align: center;
@@ -16,5 +18,6 @@
 }
 body {
 	background-color: lightblue;
+
 }
 </style>

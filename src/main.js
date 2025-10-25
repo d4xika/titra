@@ -4,6 +4,8 @@ import App from './App.vue'
 import './registerServiceWorker'
 import Aura from '@primeuix/themes/aura';
 import SelectButton from 'primevue/selectbutton';
+import AutoComplete from "primevue/autocomplete";
+import InputText from "primevue/inputtext";
 import 'primeicons/primeicons.css'
 import './primevue.css'
 import { createWebHistory, createRouter } from 'vue-router'
@@ -31,4 +33,6 @@ app.use(PrimeVue, {
 });
 app.use(router)
 app.component("SelectButton", SelectButton)
+app.component("AutoComplete", AutoComplete)
+app.component("InputText", InputText)
 app.mount('#app')

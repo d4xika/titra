@@ -30,7 +30,8 @@ import { useRouter } from "vue-router";
 const router = useRouter()
 const showUserKnownModal = ref(false)
 const username = ref('')
-const user = localStorage.getItem('user')
+const user = JSON.parse(localStorage.getItem('user'))
+const userData = ref(null)
 
 if (user) {
 	router.push('/clock')
@@ -43,22 +44,29 @@ async function verifyUsername() {
 
 	const { data } = await supabase
 			.from('users')
-			.select('username')
+			.select('username, id')
 			.eq('username', username.value)
 
+
 	if(data.length === 0) {
-		await supabase
+		const { data } = await supabase
 				.from('users')
 				.insert({username: username.value })
-		localStorage.setItem('user', username.value)
+				.select()
+
+		const userObject = { username: username.value, id: data[0].id }
+		localStorage.setItem('user', JSON.stringify(userObject) )
 		router.push('/clock')
 	} else {
+		userData.value = data[0]
 		showUserKnownModal.value = true
 	}
 }
 
 function loginUser() {
-	localStorage.setItem('user', username.value)
+	console.log(userData.value.username)
+	const userObject = { username: userData.value.username, id: userData.value.id }
+	localStorage.setItem('user', JSON.stringify(userObject))
 	router.push('/clock')
 }
 

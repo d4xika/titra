@@ -4,7 +4,7 @@
 }
 
 .p-togglebutton-content {
-    color: aliceblue;
+    color: aliceblue !important;
 }
 
 .p-togglebutton-checked span{
@@ -12,3 +12,23 @@
     color: #2c3e50;
 }
 
+.p-autocomplete {
+    width: 100% !important;
+    background-color: lightblue !important;
+    border-radius: 5px !important;
+
+}
+
+.p-autocomplete-dropdown {
+    background-color: lightblue !important;
+}
+
+.p-autocomplete-list-container {
+    background-color: lightblue !important;
+    border-radius: 5px !important;
+}
+
+.p-inputtext {
+    width: 100% !important;
+    background-color: lightblue !important;
+}

@@ -24,7 +24,7 @@
 		</div>
 	</div>
 
-	<finishedTimerModal v-if="timer.finished" @closeModal="timer.finished = false"/>
+	<finishedTimerModal :id="sessionId" v-if="timer.finished" @closeModal="timer.finished = false"/>
 	<resetTimerModal v-if="timer.reset" @yesReset="resetTimer" @closeModal="timer.reset = false" @noReset="timer.reset = false"/>
 </template>
 
@@ -34,14 +34,16 @@ import circleButton from '@/components/buttons/circleButton.vue'
 import finishedTimerModal from '@/modals/finishedTimerModal.vue'
 import resetTimerModal from "@/modals/resetTimerModal.vue";
 import iconButton from '@/components/buttons/iconButton.vue'
+import { saveSession } from "@/supabase";
 
 const timerSelection = ref("pi pi-stopwatch")
 const selectButtonKey = ref(0)
 const countdownStartTime = ref(null)
+const sessionId = ref(null)
 
 const timer = ref({
 	startTime: null,
-	passedTime: null,
+	elapsedTime: null,
 	running: false,
 	display: "00:00",
 	finished: false,
@@ -99,7 +101,8 @@ function resetTimer() {
 }
 
 
-function stopTimer() {
+async function stopTimer() {
+	sessionId.value = await saveSession(timer.value.startTime, timer.value.elapsedBeforePause, null, null)
 	resetTimer();
 	timer.value.finished = true;
 	timer.value.activeTimer = false;
