@@ -28,6 +28,10 @@
     border-radius: 5px !important;
 }
 
+.p-autocomplete-option {
+    font-family: "Chakra Petch", sans-serif !important;
+}
+
 .p-inputtext {
     width: 100% !important;
     background-color: lightblue !important;

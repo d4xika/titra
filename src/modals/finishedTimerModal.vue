@@ -8,7 +8,7 @@
 			<div class="questionsContainer">
 				<div style="width: 100%">
 					<p class="headerQuestions">Project Name</p>
-					<AutoComplete v-model="projectName" :suggestions="projects" @complete="searchProject" :virtualScrollerOptions="{ itemSize: 38 }" optionLabel="name" optionValue="name" dropdown />
+					<AutoComplete class="autocompleteField" v-model="projectName" :suggestions="projects" @complete="searchProject" :virtualScrollerOptions="{ itemSize: 38 }" optionLabel="name" optionValue="name" dropdown />
 				</div>
 				<div style="width: 100%">
 					<p class="headerQuestions">Description</p>
@@ -28,6 +28,7 @@ import textButton from '@/components/buttons/textButton.vue'
 const emit = defineEmits(['closeModal'])
 const projectName = ref('')
 const description = ref('')
+const allProjects = ref([])
 const projects = ref([])
 const user = JSON.parse(localStorage.getItem('user'))
 const props = defineProps({id: {type: Number}})
@@ -38,16 +39,30 @@ async function loadProjects() {
 			.from('projects')
 			.select()
 			.eq('user_id', user.id)
-	projects.value = data
+	allProjects.value = data
 }
 
-function searchProject() {
+function searchProject(event) {
+	const query = event.query.toLowerCase()
 
+	projects.value = allProjects.value.filter(project => {
+		return project.name.toLowerCase().includes(query)
+	})
 }
 
 async function updateProjectInfo() {
 	const projectNameString = projectName.value.name ?? projectName.value
 	let projectId = null
+
+	if (!projectNameString) {
+		await supabase
+				.from('sessions')
+				.update({ project_id: null, description: description.value })
+				.eq('id', props.id)
+
+		return
+	}
+
 	const { data } = await supabase
 			.from('projects')
 			.select('id')
@@ -120,6 +135,10 @@ p {
 .headerQuestions {
 	font-size: large;
 	margin: 5px;
+}
+
+.autocompleteField {
+	--p-inputtext-focus-border-color: #2c3e50;
 }
 
 </style>

@@ -7,7 +7,7 @@
 					<i :class="slotProps.option"></i>
 				</template>
 			</SelectButton>
-				<div>
+			<div>
 				<img v-if="timer.running" style="height: 200px; margin-bottom: 5px" src="/images/workingKitty.gif" alt="working kitty"/>
 				<img v-else style="height: 160px; margin-top: 45px" src="/images/sleepingKitty.gif" alt="sleeping kitty"/>
 			</div>
