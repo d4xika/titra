@@ -1,7 +1,7 @@
 <template>
 	<div>
 		<iconButton @click="$router.push('savedSessions')" id="listButton" icon="pi pi-list" />
-		<div style="display: flex; justify-content: center; align-items: center; flex-direction: column; margin-top: 120px">
+		<div class="mainContainer">
 			<SelectButton :disabled="timer.activeTimer" :modelValue="timerSelection" @update:modelValue="handleSelectButtonUpdate" :key="selectButtonKey" :options="['pi pi-stopwatch', 'pi pi-hourglass']">
 				<template #option="slotProps">
 					<i :class="slotProps.option"></i>
@@ -165,6 +165,14 @@ function handleSelectButtonUpdate(nextVal) {
 </script>
 
 <style scoped>
+
+.mainContainer {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	flex-direction: column;
+	margin-top: 130px;
+}
 
 #timerBox {
 	background-color: #2c3e50;

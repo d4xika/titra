@@ -2,11 +2,12 @@
 	<div id="dimmBackground">
 		<div id="modal">
 			<img style="height: 150px; margin-top: -200px" src="/images/sadKitty.gif" alt="sad kitty">
-			<closeButton @click="emit('closeModal')" id="closeButton"/>
-			<p style="margin-top: 10px">Are you sure you want to reset?</p>
+			<p style="margin-top: 10px">Are you sure you<br>want to reset?</p>
 			<div style="display: flex; justify-content: center; flex-direction: row; margin-bottom: 15px; gap: 50px">
-				<div @click="emit('yesReset')" class="choiceButtons">Yes</div>
-				<div @click="emit('noReset')" class="choiceButtons">No</div>
+				<textButton @click="emit('yesReset')" variant="lightVersion" text="Yes"></textButton>
+				<textButton @click="emit('noReset')" variant="lightVersion" text="No"></textButton>
+
+
 			</div>
 		</div>
 	</div>
@@ -14,7 +15,8 @@
 
 <script setup>
 import { defineEmits } from 'vue'
-import closeButton from '@/components/buttons/closeButton.vue'
+import textButton from '@/components/buttons/textButton.vue'
+
 const emit = defineEmits(['closeModal'])
 
 </script>
@@ -45,28 +47,9 @@ const emit = defineEmits(['closeModal'])
 	background-color: #2c3e50;
 }
 
-#closeButton {
-	position: absolute;
-	right: 10px;
-	top: 10px;
-}
-
-.choiceButtons {
-	height: 40px;
-	width: 75px;
-	color: white;
-	align-content: center;
-	background-color: rgba(173, 216, 230, 0.5);
-	border-radius: 5px;
-	font-size: large;
-	font-family: "Chakra Petch", sans-serif;
-	font-weight: 400;
-	font-style: normal;
-}
-
 p {
 	color: white;
-	font-size: x-large;
+	font-size: larger;
 	font-family: "Chakra Petch", sans-serif;
 	font-weight: 400;
 	font-style: normal;

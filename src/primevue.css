@@ -9,7 +9,7 @@
 
 .p-togglebutton-checked span{
     background-color: lightblue !important;
-    color: #2c3e50;
+    color: #2c3e50 !important;
 }
 
 .p-autocomplete {

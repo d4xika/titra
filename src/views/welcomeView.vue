@@ -1,7 +1,7 @@
 <template>
 	<div class="welcomeViewContainer">
 		<img style="height: 180px" src="/images/happyKitty.gif" alt="happy kitty"/>
-		<p class="welcomeText">Welcome friend! Do I already know you?<br>What's your name?</p>
+		<p class="welcomeText">Welcome friend!<br>Do I already know you?<br>What's your name?</p>
 		<div class="signInContainer">
 			<input v-model="username" class="inputBox" type="text">
 			<iconButton @click="verifyUsername()" icon="pi pi-sign-in"></iconButton>
@@ -10,7 +10,7 @@
 
 	<dynamic-modal v-if="showUserKnownModal" @closeModal="showUserKnownModal=false">
 		<template #content>
-			<p>I already know a {{username}}! Is it you?</p>
+			<p>I already know a {{username}}!<br>Is it you?</p>
 			<div class="buttonsContainer">
 				<textButton @click="loginUser()" variant="lightVersion" text="Yes!"></textButton>
 				<textButton @click="showUserKnownModal=false" variant="lightVersion" text="No"></textButton>
@@ -105,6 +105,7 @@ input::placeholder {
 	display: flex;
 	align-items: center;
 	flex-direction: column;
+	margin-top: 140px;
 }
 
 .signInContainer {

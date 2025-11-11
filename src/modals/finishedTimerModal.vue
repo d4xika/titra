@@ -1,9 +1,8 @@
 <template>
 	<div id="dimmBackground">
 		<div id="modal">
-			<img style="height: 150px; margin-top: -110px" src="/images/happyKitty.gif" alt="happy kitty">
-			<closeButton @click="emit('closeModal')" id="closeButton"/>
-			<p style="margin-top: 10px">Great job!</p>
+			<img style="height: 150px; margin-top: -100px" src="/images/happyKitty.gif" alt="happy kitty">
+			<p style="margin-top: -5px">Great job!</p>
 			<p style="margin-top: -20px">So proud of you!</p>
 			<div class="questionsContainer">
 				<div style="width: 100%">
@@ -23,7 +22,6 @@
 <script setup>
 import { ref, defineEmits, defineProps } from 'vue'
 import { supabase } from "@/supabase";
-import closeButton from '@/components/buttons/closeButton.vue'
 import textButton from '@/components/buttons/textButton.vue'
 const emit = defineEmits(['closeModal'])
 const projectName = ref('')
@@ -107,12 +105,6 @@ async function updateProjectInfo() {
 	padding-bottom: 30px;
 	border-radius: 15px;
 	background-color: #2c3e50;
-}
-
-#closeButton {
-	position: absolute;
-	right: 10px;
-	top: 10px;
 }
 
 p {
