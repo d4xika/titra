@@ -7,15 +7,21 @@
 		<div class="timeContainer">
 			<p class="timeDisplayText">{{timeDisplay}}</p>
 		</div>
+		<iconButton @click="selectingProject = true" class="projectSelectionContainer" icon="pi pi-briefcase">{{projectSelection}}</iconButton>
 	</div>
+
+	<selectProjectModal v-if="selectingProject" :initialSelection="projectSelection" @closeModal="selectingProject = false" @selectProject="handleProjectSelect"/>
 </template>
 
 <script setup>
 import iconButton from '@/components/buttons/iconButton.vue'
 import {ref} from "vue";
 import {supabase} from "@/supabase";
+import selectProjectModal from "@/modals/selectProjectModal.vue";
 
 const timeWindowSelection = ref("D")
+const projectSelection = ref("all projects")
+const selectingProject = ref(false)
 const selectButtonKey = ref(0)
 const allSessions = ref([])
 const timeDisplay = ref('0 h 0 min')
@@ -28,6 +34,12 @@ function handleSelectButtonUpdate(nextVal) {
 	}
 	timeWindowSelection.value = nextVal
 	showProjectTime()
+}
+
+function handleProjectSelect(selectedProjectName) {
+	projectSelection.value = selectedProjectName;
+	selectingProject.value = false;
+	showProjectTime();
 }
 
 async function showProjectTime() {
@@ -69,6 +81,15 @@ async function showProjectTime() {
 	if (startDate) {
 		query = query.gte('created_at', startDate.toISOString());
 	}
+	if(projectSelection.value !== 'all projects') {
+		const { data } = await supabase
+				.from('projects')
+				.select('id')
+				.eq('name', projectSelection.value)
+		let projectId = data[0].id
+
+		query = query.eq('project_id', projectId)
+	}
 
 	const { data } = await query;
 
@@ -105,7 +126,7 @@ async function showProjectTime() {
 }
 
 .timeContainer {
-	background-color: #2c3e50;
+	background-color: #344c61;
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -126,6 +147,17 @@ async function showProjectTime() {
 	font-family: "Chakra Petch", sans-serif;
 	font-weight: 400;
 	font-style: normal;
+}
+
+.projectSelectionContainer {
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	gap: 10px;
+	background-color: #2c3e50;
+	border-radius: 10px;
+	padding: 0 15px;
+	color: lightgrey;
 }
 
 </style>

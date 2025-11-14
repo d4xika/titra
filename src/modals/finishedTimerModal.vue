@@ -13,7 +13,7 @@
 					<p class="headerQuestions">Description</p>
 					<InputText type="text" v-model="description" />
 				</div>
-				<textButton @click="updateProjectInfo(); emit('closeModal')" variant="lightVersion" text="save"></textButton>
+				<textButton @click="updateProjectInfo(); emit('closeModal')" variant="lightVersion" text="Save"></textButton>
 			</div>
 		</div>
 	</div>

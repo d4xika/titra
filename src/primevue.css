@@ -15,12 +15,13 @@
 .p-autocomplete {
     width: 100% !important;
     background-color: lightblue !important;
-    border-radius: 5px !important;
+    border-radius: 20px !important;
 
 }
 
 .p-autocomplete-dropdown {
     background-color: lightblue !important;
+    color: #2c3e50 !important;
 }
 
 .p-autocomplete-list-container {
@@ -30,9 +31,22 @@
 
 .p-autocomplete-option {
     font-family: "Chakra Petch", sans-serif !important;
+    color: #2c3e50 !important;
+}
+
+.p-autocomplete-option.p-focus {
+    background-color: #3796b590 !important;
+}
+
+.p-autocomplete-option-selected.p-focus {
+    background-color: #3796b590 !important;
 }
 
 .p-inputtext {
     width: 100% !important;
     background-color: lightblue !important;
+}
+
+.p-inputtext:enabled:focus {
+    border-color: #2c3e50 !important;
 }

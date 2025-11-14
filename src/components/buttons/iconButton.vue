@@ -1,6 +1,7 @@
 <template>
 <div class="buttonContainer">
 	<i :class="props.icon"></i>
+	<slot></slot>
 </div>
 </template>
 
@@ -16,8 +17,8 @@ const props = defineProps({
 <style scoped>
 .buttonContainer {
 	background-color: #2c3e50;
-	width: 40px;
-	height: 40px;
+	min-width: 40px;
+	min-height: 40px;
 	display: flex;
 	justify-content: center;
 	align-items: center;
