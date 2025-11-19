@@ -9,7 +9,7 @@
 				</li>
 				<li v-for="project in projects" :key="project.id" class="projectLi">
 					<div v-if="editingProjectId === project.id" class="editContainer">
-						<input v-model="editProjectName" @keyup.enter="saveEdit" @keyup.esc="cancelEdit" class="editInput"/>
+						<input v-model="editProjectName" class="editInput"/>
 						<div class="editIcons">
 							<i class="pi pi-check" @click="saveEdit"></i>
 							<i class="pi pi-times" @click="cancelEdit"></i>
@@ -23,10 +23,11 @@
 							<i class="pi pi-times" @click="cancelDelete"></i>
 						</div>
 					</div>
+
 					<div v-else class="projectItem" :class="{ 'selected': tempSelectedProject === project.name }">
-                   <span class="projectName" @click="tempSelectedProject = project.name">
-                      {{ project.name }}
-                   </span>
+					<span class="projectName" @click="tempSelectedProject = project.name">
+						{{project.name}}
+                    </span>
 						<div class="actionIcons">
 							<i class="pi pi-pencil" @click="startEdit(project)"></i>
 							<i class="pi pi-trash" @click="askConfirmDelete(project.id)"></i>
@@ -41,8 +42,8 @@
 </template>
 
 <script setup>
-import { ref, defineEmits, defineProps, onMounted } from 'vue';
-import { supabase } from "@/supabase";
+import {ref, defineEmits, defineProps, onMounted} from 'vue';
+import {supabase} from "@/supabase";
 import textButton from '@/components/buttons/textButton.vue';
 
 const props = defineProps({
@@ -58,12 +59,13 @@ const tempSelectedProject = ref(props.initialSelection);
 const editingProjectId = ref(null);
 const editProjectName = ref('');
 const deletingProjectId = ref(null);
+const user = JSON.parse(localStorage.getItem('user'))
 
 async function fetchProjects() {
-	const { data, error } = await supabase
+	const {data, error} = await supabase
 			.from('projects')
-			.select('id, name');
-
+			.select('id, name')
+			.eq('user_id', user.id);
 	if (data) {
 		projects.value = data;
 	} else if (error) {
@@ -89,9 +91,9 @@ function cancelEdit() {
 async function saveEdit() {
 	if (!editProjectName.value || !editingProjectId.value) return;
 
-	const { error } = await supabase
+	const {error} = await supabase
 			.from('projects')
-			.update({ name: editProjectName.value })
+			.update({name: editProjectName.value})
 			.eq('id', editingProjectId.value);
 
 	if (error) {
@@ -120,7 +122,7 @@ function cancelDelete() {
 async function deleteProject(projectId) {
 	const projectToDelete = projects.value.find(p => p.id === projectId);
 
-	const { error } = await supabase
+	const {error} = await supabase
 			.from('projects')
 			.delete()
 			.eq('id', projectId);
@@ -194,9 +196,11 @@ li.allProjectsLi {
 	border-bottom: 2px solid #344c61;
 	margin-bottom: 10px;
 }
+
 li.allProjectsLi:hover {
 	background-color: rgba(255, 255, 255, 0.1);
 }
+
 li.allProjectsLi.selected {
 	background-color: #344c61;
 }
@@ -218,6 +222,7 @@ li.projectLi {
 .projectItem:hover {
 	background-color: rgba(255, 255, 255, 0.1);
 }
+
 .projectItem.selected {
 	background-color: #344c61;
 }
@@ -235,14 +240,16 @@ li.projectLi {
 	border-radius: 4px;
 	flex-shrink: 0;
 }
+
 .actionIcons i:hover {
 	color: #fff;
-	background-color: rgba(0,0,0,0.2);
+	background-color: rgba(0, 0, 0, 0.2);
 }
 
 .editContainer {
 	background-color: rgba(0, 0, 0, 0.2);
 }
+
 .editInput {
 	width: 100%;
 	flex-grow: 1;
@@ -258,8 +265,9 @@ li.projectLi {
 .deleteConfirmContainer {
 	color: lightgrey;
 }
+
 .deleteIcons i:hover {
-	background-color: rgba(0,0,0,0.2);
+	background-color: rgba(0, 0, 0, 0.2);
 }
 
 .textButton {

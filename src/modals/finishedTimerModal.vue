@@ -11,7 +11,7 @@
 				</div>
 				<div style="width: 100%">
 					<p class="headerQuestions">Description</p>
-					<InputText type="text" v-model="description" />
+					<InputText type="text" v-model="description" maxlength="35"/>
 				</div>
 				<textButton @click="updateProjectInfo(); emit('closeModal')" variant="lightVersion" text="Save"></textButton>
 			</div>
