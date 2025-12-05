@@ -51,8 +51,20 @@
     width: 100% !important;
     background-color: lightblue !important;
     color: #2c3e50 !important;
+    box-shadow: none !important;
+    padding: 0 8px !important;
+
 }
 
 .p-inputtext:enabled:focus {
     border-color: #2c3e50 !important;
+}
+
+.p-inputnumber {
+    padding: 0 !important;
+}
+
+.p-inputnumber:focus {
+    outline: none !important;
+    box-shadow: none !important;
 }

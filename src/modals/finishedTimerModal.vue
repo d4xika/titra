@@ -6,12 +6,12 @@
 			<p style="margin-top: -20px">So proud of you!</p>
 			<div class="questionsContainer">
 				<div style="width: 100%">
-					<p class="headerQuestions">Project Name</p>
+					<p class="headerQuestions">Project name</p>
 					<AutoComplete class="autocompleteField" v-model="projectName" :suggestions="projects" @complete="searchProject" :virtualScrollerOptions="{ itemSize: 38 }" optionLabel="name" optionValue="name" dropdown />
 				</div>
 				<div style="width: 100%">
 					<p class="headerQuestions">Description</p>
-					<InputText type="text" v-model="description" maxlength="35"/>
+					<InputText v-model="description" maxlength="35"/>
 				</div>
 				<textButton @click="updateProjectInfo(); emit('closeModal')" variant="lightVersion" text="Save"></textButton>
 			</div>

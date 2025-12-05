@@ -13,28 +13,52 @@
 			<li v-for="session in allSessions" :key="session.id" class="sessionItem">
 				<div>
 					<div class="dateBox">
-						<div class="dateMonth">
-							{{formatDate(session.start_time).month}}
-						</div>
-						<div class="dateDay">
-							{{formatDate(session.start_time).day}}
-						</div>
+						<div class="dateMonth">{{ formatDate(session.start_time).month }}</div>
+						<div class="dateDay">{{ formatDate(session.start_time).day }}</div>
 					</div>
 				</div>
+
 				<div class="sessionInformationContainer">
-					<div class="sessionDescription">
-                        {{ session.description || 'working hard' }}
+					<div v-if="editingSessionId !== session.id" class="sessionDescription">
+						{{ session.description || 'working hard' }}
 					</div>
-					<div class="projectName">
-						{{ getProjectNameFromCache(session.project_id)  || 'important stuff (probably)' }}
+					<div v-else class="sessionDescription">
+						<p class="labels">Description</p>
+						<InputText v-model="editFormData.description" class="editInput"/>
 					</div>
-					<div class="sessionDuration">
-                        {{ formatDuration(session.duration) }}
-                    </div>
+
+					<div v-if="editingSessionId !== session.id" class="projectName">
+						{{ getProjectNameFromCache(session.project_id) || 'important stuff' }}
+					</div>
+					<div v-else class="projectName">
+						<p class="labels">Project name</p>
+						<InputText v-model="editFormData.projectName" class="editInput"/>
+					</div>
+
+					<div v-if="editingSessionId !== session.id" class="sessionDuration">
+						{{ formatDuration(session.duration) }}
+					</div>
+					<div v-else class="sessionDuration">
+						<p class="labels">Duration</p>
+						<InputNumber v-model="editFormData.duration" class="editInput" suffix=" min" :min="0"/>
+					</div>
+
 				</div>
+
 				<div>
-					<div class="actionIcons">
+					<div v-if="editingSessionId !== session.id" @click="startEditing(session)" class="actionIcons">
 						<i class="pi pi-pencil"></i>
+					</div>
+
+					<div class="actionColumn">
+						<div v-if="editingSessionId === session.id" class="actionIcons">
+							<i class="pi pi-check" @click="saveSession()"></i>
+							<i class="pi pi-times" @click="cancelEditing()"></i>
+						</div>
+
+						<div v-if="editingSessionId === session.id" class="actionIcons">
+							<i class="pi pi-trash actionIcon deleteIcon" @click="deleteSession(session.id)"></i>
+						</div>
 					</div>
 				</div>
 			</li>
@@ -65,6 +89,12 @@ const currentPage = ref(0)
 const canLoadMore = ref(true)
 const isLoadingSessions = ref(true)
 const projectNamesCache = ref({})
+const editingSessionId = ref(null)
+const editFormData = ref({
+	description: '',
+	projectName: '',
+	duration: ''
+})
 showProjectTime()
 fetchSessions(true)
 
@@ -117,6 +147,39 @@ function applyDateFiltersToQuery(query) {
 	}
 
 	return query;
+}
+
+/*function openCalender() {
+	if(!sessionEditMode.value) {
+		return
+	}
+}*/
+
+function startEditing(session) {
+	editingSessionId.value = session.id;
+
+	editFormData.value = {
+		description: session.description,
+		projectName: getProjectNameFromCache(session.project_id),
+		duration: Math.floor(session.duration / 60)
+	};
+}
+
+function cancelEditing() {
+	editingSessionId.value = null;
+	editFormData.value = {};
+}
+
+function saveSession() {
+	//TODO: saveSession Logik
+
+	cancelEditing();
+}
+
+function deleteSession() {
+	//TODO: deleteSession Logik
+
+	cancelEditing();
 }
 
 async function showProjectTime() {
@@ -325,6 +388,7 @@ function formatDate (dateString) {
 	border-radius: 10px;
 	padding: 10px 10px;
 	display: flex;
+	justify-content: center;
 	gap: 15px;
 	color: #2c3e50;
 	font-family: "Chakra Petch", sans-serif;
@@ -332,16 +396,18 @@ function formatDate (dateString) {
 
 .sessionDescription {
 	font-size: medium;
-	font-weight: bold;
-	width: fit-content;
+	font-weight: 600;
+	color: #2c3e50;
+	width: 100%;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
-	max-width: 180px;
+	margin-bottom: 2px;
 }
 .sessionDuration {
 	font-size: medium;
-	width: fit-content;
+	color: #2c3e50;
+	width: 100%;
 }
 
 .dateBox {
@@ -358,20 +424,36 @@ function formatDate (dateString) {
 
 .sessionInformationContainer {
 	display: flex;
-	justify-content: start;
+	justify-content: center;
 	flex-direction: column;
 	flex-grow: 1;
+	min-width: 0;
+	align-items: flex-start;
+	text-align: left;
+	padding-right: 10px;
 }
 
 .projectName {
-	font-size: small;
-	margin-bottom: 7px;
-	width: fit-content;
+	font-size: 13px;
+	color: #344c61;
+	width: 100%;
+	margin-bottom: 5px;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.actionColumn {
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+	align-items: center;
+	padding: 5px 0;
+	height: 100%;
 }
 
 .actionIcons {
 	cursor: pointer;
-	padding: 4px;
 }
 
 .dateMonth {
@@ -382,5 +464,55 @@ function formatDate (dateString) {
 	font-size: x-large;
 }
 
+.editInput {
+	width: 100%;
+	box-sizing: border-box;
+	background-color: lightblue;
+	color: #2c3e50;
+	border: 1px solid #344c61;
+	border-radius: 4px;
+	display: flex;
+	align-items: center;
+	height: 30px;
+	font-family: inherit;
+	font-size: 14px;
+	margin-bottom: 5px;
+}
+
+.editInput.p-inputnumber {
+	padding: 0;
+	border: 1px solid #344c61;
+}
+
+.editInput :deep(.p-inputtext) {
+	background-color: transparent !important;
+	border: none !important;
+	box-shadow: none !important;
+	color: #2c3e50 !important;
+	width: 100%;
+	height: 100%;
+	padding: 0 8px;
+	font-family: inherit;
+	font-size: 14px;
+}
+
+
+.editInput:focus-within {
+	border-color: #2c3e50;
+}
+
+.editInput :deep(.p-inputtext:focus) {
+	outline: none !important;
+}
+
+.labels {
+	margin: 0 0 4px 0;
+	font-size: 15px;
+	font-weight: bold;
+	color: #2c3e50;
+	text-align: left;
+	display: block;
+	width: 100%;
+}
 
 </style>
