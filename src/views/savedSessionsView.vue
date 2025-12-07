@@ -11,11 +11,12 @@
 
 		<ul class="sessionListContainer">
 			<li v-for="session in allSessions" :key="session.id" class="sessionItem">
-				<div>
+				<div class="leftContainer">
 					<div class="dateBox">
 						<div class="dateMonth">{{ formatDate(session.start_time).month }}</div>
 						<div class="dateDay">{{ formatDate(session.start_time).day }}</div>
 					</div>
+					<DatePicker v-if="editingSessionId === session.id" v-model="editFormData.date" showIcon dateFormat="dd/mm/yy"></DatePicker>
 				</div>
 
 				<div class="sessionInformationContainer">
@@ -67,6 +68,8 @@
 		<textButton v-if="canLoadMore && !isLoadingSessions" @click="fetchSessions(false)" text="Load More"/>
 	</div>
 
+	<iconButton @click="createNewSession()" icon="pi pi-plus" class="addSessionButton"></iconButton>
+
 	<selectProjectModal v-if="selectingProject" :initialSelection="projectSelection" @closeModal="selectingProject = false" @selectProject="handleProjectSelect"/>
 </template>
 
@@ -82,7 +85,7 @@ const projectSelection = ref("all projects")
 const selectingProject = ref(false)
 const selectButtonKey = ref(0)
 const allSessions = ref([])
-const timeDisplay = ref('0 h 0 min')
+const timeDisplay = ref('00 h 00 min')
 const user = JSON.parse(localStorage.getItem('user'))
 const sessionsPerPage = ref(10)
 const currentPage = ref(0)
@@ -93,7 +96,8 @@ const editingSessionId = ref(null)
 const editFormData = ref({
 	description: '',
 	projectName: '',
-	duration: ''
+	duration: '',
+	date: null
 })
 showProjectTime()
 fetchSessions(true)
@@ -143,17 +147,11 @@ function applyDateFiltersToQuery(query) {
 	}
 
 	if (startDate) {
-		query = query.gte('created_at', startDate.toISOString());
+		query = query.gte('start_time', startDate.getTime());
 	}
 
 	return query;
 }
-
-/*function openCalender() {
-	if(!sessionEditMode.value) {
-		return
-	}
-}*/
 
 function startEditing(session) {
 	editingSessionId.value = session.id;
@@ -170,14 +168,63 @@ function cancelEditing() {
 	editFormData.value = {};
 }
 
-function saveSession() {
-	//TODO: saveSession Logik
+async function saveSession() {
+	let projectId = null
+
+	if (!editFormData.value.projectName) {
+		const data = {
+			duration: editFormData.value.duration * 60,
+			description: editFormData.value.description,
+		}
+
+		if (editFormData.value.date !== undefined && editFormData.value.date !== null) {
+			console.log(editFormData.value.date)
+			data["start_time"] = editFormData.value.date.getTime()
+		}
+
+		await supabase
+				.from('sessions')
+				.update(data)
+				.eq('id', editingSessionId.value)
+
+		cancelEditing();
+		await fetchSessions(true);
+		return
+	}
+
+	const { data } = await supabase
+			.from('projects')
+			.select('id')
+			.eq('name', editFormData.value.projectName)
+			.eq('user_id', user.id)
+
+	if(data.length === 0) {
+		const response = await supabase
+				.from('projects')
+				.insert({name: editFormData.value.projectName, user_id: user.id})
+				.select('id')
+		projectId = response.data[0].id
+	} else {
+		projectId = data[0].id
+	}
+
+	await supabase
+			.from('sessions')
+			.update({duration: editFormData.value.duration * 60, description: editFormData.value.description, project_id: projectId})
+			.eq('id', editingSessionId.value)
 
 	cancelEditing();
+	await fetchSessions(true);
 }
 
-function deleteSession() {
-	//TODO: deleteSession Logik
+async function deleteSession() {
+
+	await supabase
+			.from('sessions')
+			.delete()
+			.eq('id', editingSessionId.value);
+
+	allSessions.value = allSessions.value.filter(s => s.id !== editingSessionId.value);
 
 	cancelEditing();
 }
@@ -188,7 +235,8 @@ async function showProjectTime() {
 		const { data } = await supabase
 				.from('projects')
 				.select('id')
-				.eq('name', projectSelection.value);
+				.eq('name', projectSelection.value)
+				.eq('user_id', user.id);
 
 		if (data && data.length > 0) {
 			projectId = data[0].id;
@@ -236,7 +284,8 @@ async function fetchSessions(reset = false) {
 			const { data } = await supabase
 					.from('projects')
 					.select('id')
-					.eq('name', projectSelection.value);
+					.eq('name', projectSelection.value)
+					.eq('user_id', user.id);
 			if (data && data.length > 0) {
 				projectId = data[0].id;
 			}
@@ -316,6 +365,17 @@ function formatDate (dateString) {
 	const day = date.getDate().toString().padStart(2, '0');
 
 	return { month, day };
+}
+
+async function createNewSession() {
+
+	const { data } = await supabase
+			.from('sessions')
+			.insert({duration: undefined, description: undefined, project_id: undefined, start_time: new Date().getTime(), user_id: user.id})
+			.select('id')
+
+	editingSessionId.value = data[0].id
+	await fetchSessions(true);
 }
 
 
@@ -469,7 +529,7 @@ function formatDate (dateString) {
 	box-sizing: border-box;
 	background-color: lightblue;
 	color: #2c3e50;
-	border: 1px solid #344c61;
+	border: 1px solid #344c61 !important;
 	border-radius: 4px;
 	display: flex;
 	align-items: center;
@@ -481,12 +541,11 @@ function formatDate (dateString) {
 
 .editInput.p-inputnumber {
 	padding: 0;
-	border: 1px solid #344c61;
+	border: 1px solid #344c61 !important;
 }
 
 .editInput :deep(.p-inputtext) {
 	background-color: transparent !important;
-	border: none !important;
 	box-shadow: none !important;
 	color: #2c3e50 !important;
 	width: 100%;
@@ -498,7 +557,7 @@ function formatDate (dateString) {
 
 
 .editInput:focus-within {
-	border-color: #2c3e50;
+	border: 1px solid #2c3e50 !important;
 }
 
 .editInput :deep(.p-inputtext:focus) {
@@ -513,6 +572,20 @@ function formatDate (dateString) {
 	text-align: left;
 	display: block;
 	width: 100%;
+}
+
+.leftContainer {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 65px;
+	gap: 7px;
+}
+
+.addSessionButton {
+	position: fixed;
+	right: 30px;
+	bottom: 30px;
 }
 
 </style>

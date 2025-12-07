@@ -53,11 +53,15 @@
     color: #2c3e50 !important;
     box-shadow: none !important;
     padding: 0 8px !important;
-
+    border: none !important;
 }
 
 .p-inputtext:enabled:focus {
-    border-color: #2c3e50 !important;
+    border: none !important;
+}
+
+.p-inputtext:hover {
+    border: none !important;
 }
 
 .p-inputnumber {
@@ -67,4 +71,18 @@
 .p-inputnumber:focus {
     outline: none !important;
     box-shadow: none !important;
+}
+
+.p-datepicker {
+    font-family: "Chakra Petch", sans-serif !important;
+}
+
+.p-datepicker-input {
+    display: none !important;
+}
+
+.p-datepicker-dropdown {
+    border: none !important;
+    border-radius: 5px !important;
+    background-color: transparent !important;
 }

@@ -11,7 +11,7 @@
 				</div>
 				<div style="width: 100%">
 					<p class="headerQuestions">Description</p>
-					<InputText v-model="description" maxlength="35"/>
+					<InputText v-model="description" maxlength="35" class="descriptionField"/>
 				</div>
 				<textButton @click="updateProjectInfo(); emit('closeModal')" variant="lightVersion" text="Save"></textButton>
 			</div>
@@ -41,9 +41,11 @@ async function loadProjects() {
 }
 
 function searchProject(event) {
+	console.log(event.query)
 	const query = event.query.toLowerCase()
 
 	projects.value = allProjects.value.filter(project => {
+		console.log(project.name)
 		return project.name.toLowerCase().includes(query)
 	})
 }
@@ -65,6 +67,7 @@ async function updateProjectInfo() {
 			.from('projects')
 			.select('id')
 			.eq('name', projectNameString)
+			.eq('user_id', user.id)
 
 	if(data.length === 0) {
 		const response = await supabase
@@ -131,6 +134,11 @@ p {
 
 .autocompleteField {
 	--p-inputtext-focus-border-color: #2c3e50;
+	height: 35px;
+}
+
+.descriptionField {
+	height: 35px;
 }
 
 </style>
