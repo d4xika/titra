@@ -4,6 +4,17 @@
 		<div class="timeWindows">
 			<SelectButton :modelValue="timeWindowSelection" @update:modelValue="handleSelectButtonUpdate" :key="selectButtonKey" :options="['D', 'W', 'M', 'Y', 'ALL']"></SelectButton>
 		</div>
+		<div v-if="timeWindowSelection !== 'ALL'" class="dateNavigationContainer">
+			<div @click="navigateDate(-1)" class="navArrow">
+				<i class="pi pi-chevron-left"></i>
+			</div>
+
+			<span class="dateNavigationText">{{ dateDisplayString }}</span>
+
+			<div @click="navigateDate(1)" class="navArrow">
+				<i class="pi pi-chevron-right"></i>
+			</div>
+		</div>
 		<div class="timeContainer">
 			<p class="timeDisplayText">{{timeDisplay}}</p>
 		</div>
@@ -76,7 +87,7 @@
 <script setup>
 import iconButton from '@/components/buttons/iconButton.vue'
 import textButton from '@/components/buttons/textButton.vue'
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import {supabase} from "@/supabase";
 import selectProjectModal from "@/modals/selectProjectModal.vue";
 
@@ -99,6 +110,7 @@ const editFormData = ref({
 	duration: '',
 	date: null
 })
+const currentReferenceDate = ref(new Date())
 showProjectTime()
 fetchSessions(true)
 
@@ -109,8 +121,63 @@ function handleSelectButtonUpdate(nextVal) {
 	}
 	timeWindowSelection.value = nextVal
 
+	currentReferenceDate.value = new Date()
+
 	showProjectTime()
 	fetchSessions(true)
+}
+
+function navigateDate(direction) {
+	const newDate = new Date(currentReferenceDate.value)
+
+	switch (timeWindowSelection.value) {
+		case 'D':
+			newDate.setDate(newDate.getDate() + direction)
+			break
+		case 'W':
+			newDate.setDate(newDate.getDate() + (direction * 7))
+			break
+		case 'M':
+			newDate.setMonth(newDate.getMonth() + direction)
+			break
+		case 'Y':
+			newDate.setFullYear(newDate.getFullYear() + direction)
+			break
+	}
+
+	currentReferenceDate.value = newDate
+	showProjectTime()
+	fetchSessions(true)
+}
+
+const dateDisplayString = computed(() => {
+	const date = new Date(currentReferenceDate.value)
+	const lang = 'de-DE'
+
+	switch (timeWindowSelection.value) {
+		case 'D':
+			return date.toLocaleDateString(lang, {day: '2-digit', month: '2-digit', year: 'numeric'})
+		case 'W': {
+			const startOfWeek = getStartOfWeek(date)
+			const endOfWeek = new Date(startOfWeek)
+			endOfWeek.setDate(endOfWeek.getDate() + 6)
+			return `${startOfWeek.getDate()}.${startOfWeek.getMonth() + 1}. - ${endOfWeek.getDate()}.${endOfWeek.getMonth() + 1}.${endOfWeek.getFullYear()}`
+
+		}
+		case 'M':
+			return date.toLocaleDateString(lang, { month: 'long', year: 'numeric' })
+		case 'Y':
+			return date.toLocaleDateString(lang, { year: 'numeric' })
+		default:
+			return ''
+	}
+})
+
+function getStartOfWeek(date) {
+	const d = new Date(date)
+	const day = d.getDay()
+	const diff = d.getDate() - day + (day === 0 ? -6 : 1)
+	return new Date(d.setDate(diff))
 }
 
 function handleProjectSelect(selectedProjectName) {
@@ -122,32 +189,39 @@ function handleProjectSelect(selectedProjectName) {
 }
 
 function applyDateFiltersToQuery(query) {
-	const now = new Date();
+	if (timeWindowSelection.value === 'ALL') return query;
+
+	const refDate = new Date(currentReferenceDate.value);
 	let startDate = null;
+	let endDate = null;
 
 	switch (timeWindowSelection.value) {
 		case 'D':
-			startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+			startDate = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate(), 0, 0, 0);
+			endDate = new Date(refDate.getFullYear(), refDate.getMonth(), refDate.getDate(), 23, 59, 59);
 			break;
 		case 'W': {
-			let heuteKopie = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-			const tagDerWoche = heuteKopie.getDay();
-			const diff = heuteKopie.getDate() - tagDerWoche + (tagDerWoche === 0 ? -6 : 1);
-			startDate = new Date(heuteKopie.setDate(diff));
+			const start = getStartOfWeek(refDate);
+			startDate = new Date(start.setHours(0,0,0,0));
+
+			const end = new Date(start);
+			end.setDate(end.getDate() + 6);
+			endDate = new Date(end.setHours(23,59,59,999));
 			break;
 		}
 		case 'M':
-			startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+			startDate = new Date(refDate.getFullYear(), refDate.getMonth(), 1, 0, 0, 0);
+			endDate = new Date(refDate.getFullYear(), refDate.getMonth() + 1, 0, 23, 59, 59);
 			break;
 		case 'Y':
-			startDate = new Date(now.getFullYear(), 0, 1);
-			break;
-		case 'ALL':
+			startDate = new Date(refDate.getFullYear(), 0, 1);
+			endDate = new Date(refDate.getFullYear(), 11, 31, 23, 59, 59);
 			break;
 	}
 
-	if (startDate) {
-		query = query.gte('start_time', startDate.getTime());
+	if (startDate && endDate) {
+		query = query.gte('start_time', startDate.getTime())
+				.lte('start_time', endDate.getTime());
 	}
 
 	return query;
@@ -159,7 +233,8 @@ function startEditing(session) {
 	editFormData.value = {
 		description: session.description,
 		projectName: getProjectNameFromCache(session.project_id),
-		duration: Math.floor(session.duration / 60)
+		duration: Math.floor(session.duration / 60),
+		date: session.start_time ? new Date(session.start_time) : null
 	};
 }
 
@@ -406,7 +481,7 @@ async function createNewSession() {
 	height: 120px;
 	border-radius: 15px;
 	margin-bottom: 10px;
-	margin-top: 30px;
+	margin-top: 10px;
 }
 
 .timeWindows :deep(.p-togglebutton){
@@ -444,7 +519,7 @@ async function createNewSession() {
 
 .sessionItem {
 	background-color: lightblue;
-	border: 3px solid #2c3e50;
+	border: 2px solid #2c3e50;
 	border-radius: 10px;
 	padding: 10px 10px;
 	display: flex;
@@ -586,6 +661,27 @@ async function createNewSession() {
 	position: fixed;
 	right: 30px;
 	bottom: 30px;
+}
+
+.dateNavigationContainer {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 10px;
+	width: 310px;
+}
+
+.dateNavigationText {
+	color: #2c3e50;
+	font-family: "Chakra Petch", sans-serif;
+	font-size: 20px;
+	min-width: 150px;
+	text-align: center;
+}
+
+.navArrow {
+	color: #2c3e50;
 }
 
 </style>
