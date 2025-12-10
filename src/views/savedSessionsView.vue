@@ -24,8 +24,8 @@
 			<li v-for="session in allSessions" :key="session.id" class="sessionItem">
 				<div class="leftContainer">
 					<div class="dateBox">
-						<div class="dateMonth">{{ formatDate(session.start_time).month }}</div>
-						<div class="dateDay">{{ formatDate(session.start_time).day }}</div>
+						<div class="dateMonth">{{ formatDate(getDisplayDate(session)).month }}</div>
+						<div class="dateDay">{{ formatDate(getDisplayDate(session)).day }}</div>
 					</div>
 					<DatePicker v-if="editingSessionId === session.id" v-model="editFormData.date" showIcon dateFormat="dd/mm/yy"></DatePicker>
 				</div>
@@ -152,11 +152,11 @@ function navigateDate(direction) {
 
 const dateDisplayString = computed(() => {
 	const date = new Date(currentReferenceDate.value)
-	const lang = 'de-DE'
+	const lang = 'en-US'
 
 	switch (timeWindowSelection.value) {
 		case 'D':
-			return date.toLocaleDateString(lang, {day: '2-digit', month: '2-digit', year: 'numeric'})
+			return date.toLocaleDateString('de-De', {day: '2-digit', month: '2-digit', year: 'numeric'})
 		case 'W': {
 			const startOfWeek = getStartOfWeek(date)
 			const endOfWeek = new Date(startOfWeek)
@@ -244,52 +244,45 @@ function cancelEditing() {
 }
 
 async function saveSession() {
-	let projectId = null
-
-	if (!editFormData.value.projectName) {
-		const data = {
-			duration: editFormData.value.duration * 60,
-			description: editFormData.value.description,
-		}
-
-		if (editFormData.value.date !== undefined && editFormData.value.date !== null) {
-			console.log(editFormData.value.date)
-			data["start_time"] = editFormData.value.date.getTime()
-		}
-
-		await supabase
-				.from('sessions')
-				.update(data)
-				.eq('id', editingSessionId.value)
-
-		cancelEditing();
-		await fetchSessions(true);
-		return
+	const updates = {
+		duration: editFormData.value.duration * 60,
+		description: editFormData.value.description,
 	}
 
-	const { data } = await supabase
-			.from('projects')
-			.select('id')
-			.eq('name', editFormData.value.projectName)
-			.eq('user_id', user.id)
+	if (editFormData.value.date) {
+		updates.start_time = new Date(editFormData.value.date).getTime();
+	}
 
-	if(data.length === 0) {
-		const response = await supabase
+	if (editFormData.value.projectName) {
+		const { data } = await supabase
 				.from('projects')
-				.insert({name: editFormData.value.projectName, user_id: user.id})
 				.select('id')
-		projectId = response.data[0].id
-	} else {
-		projectId = data[0].id
+				.eq('name', editFormData.value.projectName)
+				.eq('user_id', user.id)
+
+		let projectId = null;
+
+		if (data.length === 0) {
+			const response = await supabase
+					.from('projects')
+					.insert({ name: editFormData.value.projectName, user_id: user.id })
+					.select('id')
+			projectId = response.data[0].id
+		} else {
+			projectId = data[0].id
+		}
+
+		updates.project_id = projectId;
 	}
 
 	await supabase
 			.from('sessions')
-			.update({duration: editFormData.value.duration * 60, description: editFormData.value.description, project_id: projectId})
+			.update(updates)
 			.eq('id', editingSessionId.value)
 
 	cancelEditing();
 	await fetchSessions(true);
+
 }
 
 async function deleteSession() {
@@ -302,6 +295,7 @@ async function deleteSession() {
 	allSessions.value = allSessions.value.filter(s => s.id !== editingSessionId.value);
 
 	cancelEditing();
+	await showProjectTime();
 }
 
 async function showProjectTime() {
@@ -440,6 +434,13 @@ function formatDate (dateString) {
 	const day = date.getDate().toString().padStart(2, '0');
 
 	return { month, day };
+}
+
+function getDisplayDate(session) {
+	if (editingSessionId.value === session.id && editFormData.value.date) {
+		return editFormData.value.date;
+	}
+	return session.start_time;
 }
 
 async function createNewSession() {
