@@ -8,6 +8,12 @@
 		</div>
 	</div>
 
+  <button @click="startLiveActivity()">SEXY TIME</button>
+  <button @click="updateActivity()">more sexy TIME</button>
+  <button @click="endActivity()">no sexy TIME</button>
+
+
+  X {{ activityId }} X
 	<dynamic-modal v-if="showUserKnownModal" @closeModal="showUserKnownModal=false">
 		<template #content>
 			<p>I already know a {{username}}!<br>Is it you?</p>
@@ -26,12 +32,35 @@ import iconButton from '@/components/buttons/iconButton.vue'
 import DynamicModal from '@/modals/dynamicModal.vue'
 import textButton from '@/components/buttons/textButton.vue'
 import { useRouter } from "vue-router";
+import { LiveActivities } from 'live-activities';
 
 const router = useRouter()
 const showUserKnownModal = ref(false)
 const username = ref('')
 const user = JSON.parse(localStorage.getItem('user'))
 const userData = ref(null)
+const activityId = ref(null);
+
+async function startLiveActivity() {
+  const res = await LiveActivities.start({
+    value: '1'
+  });
+
+  activityId.value = res.activityId;
+  console.log('Started Live Activity:', res);
+  return res;
+}
+
+async function updateActivity() {
+  await LiveActivities.update({
+    activityId: activityId.value,
+    value: '40'
+  });
+}
+
+async function endActivity() {
+  await LiveActivities.end({ activityId: activityId.value });
+}
 
 if (user) {
 	router.push('/clock')
