@@ -76,12 +76,12 @@
 			</li>
 		</ul>
 
-		<textButton v-if="canLoadMore && !isLoadingSessions" @click="fetchSessions(false)" text="Load More"/>
+		<textButton v-if="canLoadMore && !isLoadingSessions" @click="fetchSessions(false)" text="Load More" style="margin-bottom: 25px"/>
 	</div>
 
 	<iconButton @click="createNewSession()" icon="pi pi-plus" class="addSessionButton"></iconButton>
 
-	<selectProjectModal v-if="selectingProject" :initialSelection="projectSelection" @closeModal="selectingProject = false" @selectProject="handleProjectSelect"/>
+	<selectProjectModal v-if="selectingProject" :initialSelection="projectSelection" @closeModal="selectingProject = false" @selectProject="handleProjectSelect" @projectsChanged="refreshDataAfterProjectChange"/>
 </template>
 
 <script setup>
@@ -454,6 +454,11 @@ async function createNewSession() {
 	await fetchSessions(true);
 }
 
+function refreshDataAfterProjectChange() {
+	projectNamesCache.value = {};
+	fetchSessions(true);
+	showProjectTime();
+}
 
 </script>
 

@@ -29,6 +29,9 @@ export const router = createRouter({
 
 const app = createApp(App);
 app.use(PrimeVue, {
+    locale: {
+        firstDayOfWeek: 1
+    },
     theme: {
         preset: Aura
     }

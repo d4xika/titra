@@ -1,6 +1,6 @@
 {
-  "name": "Kitty Stopwatch",
-  "short_name": "Stopwatch",
+  "name": "Titra",
+  "short_name": "titra",
   "start_url": ".",
   "display": "standalone",
   "background_color": "lightblue",

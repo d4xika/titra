@@ -52,7 +52,7 @@ const props = defineProps({
 		default: 'all projects'
 	}
 });
-const emit = defineEmits(['closeModal', 'selectProject']);
+const emit = defineEmits(['closeModal', 'selectProject', 'projectsChanged']);
 
 const projects = ref([]);
 const tempSelectedProject = ref(props.initialSelection);
@@ -106,6 +106,7 @@ async function saveEdit() {
 		if (tempSelectedProject.value === projects.value.find(p => p.id === editingProjectId.value)?.name) {
 			tempSelectedProject.value = editProjectName.value;
 		}
+		emit('projectsChanged');
 	}
 	cancelEdit();
 }
@@ -134,6 +135,7 @@ async function deleteProject(projectId) {
 		if (tempSelectedProject.value === projectToDelete?.name) {
 			tempSelectedProject.value = 'all projects';
 		}
+		emit('projectsChanged');
 	}
 	cancelDelete();
 }
