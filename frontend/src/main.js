@@ -10,22 +10,7 @@ import InputNumber from 'primevue/inputnumber';
 import DatePicker from 'primevue/datepicker';
 import 'primeicons/primeicons.css'
 import './primevue.css'
-import { createWebHistory, createRouter } from 'vue-router'
-
-import mainView from '@/views/mainView.vue'
-import savedSessionsView from '@/views/savedSessionsView.vue'
-import welcomeView from '@/views/welcomeView.vue'
-
-const routes = [
-    { path: '/clock', component: mainView },
-    { path: '/savedSessions', component: savedSessionsView },
-    { path: '/', component: welcomeView }
-]
-
-export const router = createRouter({
-    history: createWebHistory(),
-    routes,
-})
+import { router } from '@/router/router.js'
 
 const app = createApp(App);
 app.use(PrimeVue, {
