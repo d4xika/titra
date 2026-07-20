@@ -6,6 +6,8 @@ import DynamicModal from "@/modals/dynamicModal.vue";
 import textButton from "@/components/buttons/textButton.vue";
 import { useRouter } from "vue-router";
 import { LiveActivities } from "live-activities";
+import API from "@/helper/api.js";
+import { setAuthStatus } from "@/router/router.js";
 
 const router = useRouter();
 const showUserKnownModal = ref(false);
@@ -13,6 +15,10 @@ const username = ref("");
 const user = JSON.parse(localStorage.getItem("user"));
 const userData = ref(null);
 const activityId = ref(null);
+
+const usernameNew = ref("");
+const emailNew = ref("");
+const passwordNew = ref("");
 
 async function startLiveActivity() {
   const res = await LiveActivities.start({
@@ -35,8 +41,8 @@ async function endActivity() {
   await LiveActivities.end({ activityId: activityId.value });
 }
 
-if (user) {
-  router.push("/clock");
+if (user && user.username) {
+  router.push("/home");
 }
 
 async function verifyUsername() {
@@ -57,7 +63,7 @@ async function verifyUsername() {
 
     const userObject = { username: username.value, id: data[0].id };
     localStorage.setItem("user", JSON.stringify(userObject));
-    router.push("/clock");
+    router.push("/home");
   } else {
     userData.value = data[0];
     showUserKnownModal.value = true;
@@ -71,7 +77,60 @@ function loginUser() {
     id: userData.value.id,
   };
   localStorage.setItem("user", JSON.stringify(userObject));
-  router.push("/clock");
+  router.push("/home");
+}
+
+async function registerNew() {
+  API.get("csrf").then((response) => {
+    API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
+
+    API.post("users/register", {
+      username: usernameNew.value,
+      password: passwordNew.value,
+      email: emailNew.value,
+    }).then(
+      (response) => {
+        console.log(response);
+        localStorage.setItem("user", JSON.stringify(response.data));
+        setAuthStatus(true);
+        router.push("/home");
+        console.log(localStorage.getItem("user"));
+      },
+      (error) => {
+        if (error.status === 409) {
+          // help
+        } else {
+          // help
+        }
+      },
+    );
+  });
+}
+
+async function loginNew() {
+  API.get("csrf").then((response) => {
+    API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
+
+    API.post("users/login", {
+      username: usernameNew.value,
+      password: passwordNew.value,
+    }).then(
+      (response) => {
+        console.log(response);
+        localStorage.setItem("user", JSON.stringify(response.data));
+        setAuthStatus(true);
+        router.push("/home");
+        console.log(localStorage.getItem("user"));
+      },
+      (error) => {
+        if (error.status === 409) {
+          // help
+        } else {
+          // help
+        }
+      },
+    );
+  });
 }
 </script>
 
@@ -96,6 +155,20 @@ function loginUser() {
   <button @click="endActivity()">end activity</button>
 
   X {{ activityId }} X
+
+  <div style="display: flex; flex-direction: column; gap: 10px">
+    <input v-model="usernameNew" type="text" />
+    <input v-model="emailNew" type="text" />
+    <input v-model="passwordNew" type="text" />
+    <button @click="registerNew()">register</button>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 10px">
+    <input v-model="usernameNew" type="text" />
+    <input v-model="passwordNew" type="text" />
+    <button @click="loginNew()">login</button>
+  </div>
+
   <dynamic-modal
     v-if="showUserKnownModal"
     @closeModal="showUserKnownModal = false"

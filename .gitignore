@@ -21,3 +21,13 @@ pnpm-debug.log*
 *.njsproj
 *.sln
 *.sw?
+
+# Backend
+**/config/master.key
+
+backend/log
+backend/tmp
+backend/.kamal
+backend/test
+backend/storage
+.keep
