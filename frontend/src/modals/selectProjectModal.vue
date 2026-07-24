@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import { supabase } from "@/supabase";
 import textButton from "@/components/buttons/textButton.vue";
+import API from "../helper/api.js";
 
 const props = defineProps({
   initialSelection: {
@@ -16,17 +16,13 @@ const tempSelectedProject = ref(props.initialSelection);
 const editingProjectId = ref(null);
 const editProjectName = ref("");
 const deletingProjectId = ref(null);
-const user = JSON.parse(localStorage.getItem("user"));
 
 async function fetchProjects() {
-  const { data, error } = await supabase
-    .from("projects")
-    .select("id, name")
-    .eq("user_id", user.id);
-  if (data) {
-    projects.value = data;
-  } else if (error) {
-    console.error("Error while loading projects: ", error.message);
+  try {
+    const response = await API.get("projects");
+    projects.value = response.data;
+  } catch (error) {
+    console.log(error);
   }
 }
 
@@ -48,14 +44,11 @@ function cancelEdit() {
 async function saveEdit() {
   if (!editProjectName.value || !editingProjectId.value) return;
 
-  const { error } = await supabase
-    .from("projects")
-    .update({ name: editProjectName.value })
-    .eq("id", editingProjectId.value);
+  try {
+    await API.patch(`projects/${editingProjectId.value}`, {
+      project: { name: editProjectName.value },
+    });
 
-  if (error) {
-    console.error("Error while editing: ", error.message);
-  } else {
     const index = projects.value.findIndex(
       (p) => p.id === editingProjectId.value,
     );
@@ -69,8 +62,11 @@ async function saveEdit() {
       tempSelectedProject.value = editProjectName.value;
     }
     emit("projectsChanged");
+
+    cancelEdit();
+  } catch (error) {
+    console.log(error);
   }
-  cancelEdit();
 }
 
 function askConfirmDelete(projectId) {
@@ -85,21 +81,19 @@ function cancelDelete() {
 async function deleteProject(projectId) {
   const projectToDelete = projects.value.find((p) => p.id === projectId);
 
-  const { error } = await supabase
-    .from("projects")
-    .delete()
-    .eq("id", projectId);
+  try {
+    await API.delete(`projects/${projectId}`);
 
-  if (error) {
-    console.error("Error while deleting: ", error.message);
-  } else {
     projects.value = projects.value.filter((p) => p.id !== projectId);
     if (tempSelectedProject.value === projectToDelete?.name) {
       tempSelectedProject.value = "all projects";
     }
     emit("projectsChanged");
+
+    cancelDelete();
+  } catch (error) {
+    console.log(error);
   }
-  cancelDelete();
 }
 
 onMounted(() => {

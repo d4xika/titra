@@ -1,67 +1,71 @@
 <script setup>
 import { ref } from "vue";
-import { supabase } from "@/supabase";
 import textButton from "@/components/buttons/textButton.vue";
+import API from "../helper/api.js";
 
 const emit = defineEmits(["closeModal"]);
 const projectName = ref("");
 const description = ref("");
 const allProjects = ref([]);
 const projects = ref([]);
-const user = JSON.parse(localStorage.getItem("user"));
 const props = defineProps({ id: { type: Number } });
 loadProjects();
 
 async function loadProjects() {
-  const { data } = await supabase
-    .from("projects")
-    .select()
-    .eq("user_id", user.id);
-  allProjects.value = data;
+  try {
+    const response = await API.get("projects");
+    allProjects.value = response.data;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function searchProject(event) {
-  console.log(event.query);
   const query = event.query.toLowerCase();
 
   projects.value = allProjects.value.filter((project) => {
-    console.log(project.name);
     return project.name.toLowerCase().includes(query);
   });
 }
 
 async function updateProjectInfo() {
   const projectNameString = projectName.value.name ?? projectName.value;
-  let projectId = null;
 
   if (!projectNameString) {
-    await supabase
-      .from("sessions")
-      .update({ project_id: null, description: description.value })
-      .eq("id", props.id);
+    await API.patch(`sessions/${props.id}`, {
+      session: {
+        project_id: null,
+        description: description.value,
+      },
+    });
 
     return;
   }
 
-  const { data } = await supabase
-    .from("projects")
-    .select("id")
-    .eq("name", projectNameString)
-    .eq("user_id", user.id);
+  let projectId = null;
 
-  if (data.length === 0) {
-    const response = await supabase
-      .from("projects")
-      .insert({ name: projectNameString, user_id: user.id })
-      .select("id");
-    projectId = response.data[0].id;
-  } else {
-    projectId = data[0].id;
+  try {
+    const response = await API.get(`projects`, {
+      params: { name: projectNameString },
+    });
+    if (response.data && response.data.id) {
+      projectId = response.data.id;
+    } else {
+      const createResponse = await API.post("projects", {
+        project: { name: projectNameString },
+      });
+      projectId = createResponse.data.id;
+    }
+  } catch (error) {
+    console.log(error);
   }
-  await supabase
-    .from("sessions")
-    .update({ project_id: projectId, description: description.value })
-    .eq("id", props.id);
+
+  await API.patch(`sessions/${props.id}`, {
+    session: {
+      project_id: projectId,
+      description: description.value,
+    },
+  });
 }
 </script>
 

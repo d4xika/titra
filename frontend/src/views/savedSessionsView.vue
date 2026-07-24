@@ -2,8 +2,8 @@
 import iconButton from "@/components/buttons/iconButton.vue";
 import textButton from "@/components/buttons/textButton.vue";
 import { ref, computed } from "vue";
-import { supabase } from "@/supabase";
 import selectProjectModal from "@/modals/selectProjectModal.vue";
+import API from "@/helper/api.js";
 
 const timeWindowSelection = ref("D");
 const projectSelection = ref("all projects");
@@ -11,7 +11,6 @@ const selectingProject = ref(false);
 const selectButtonKey = ref(0);
 const allSessions = ref([]);
 const timeDisplay = ref("00 h 00 min");
-const user = JSON.parse(localStorage.getItem("user"));
 const sessionsPerPage = ref(10);
 const currentPage = ref(0);
 const canLoadMore = ref(true);
@@ -105,74 +104,6 @@ function handleProjectSelect(selectedProjectName) {
   fetchSessions(true);
 }
 
-function applyDateFiltersToQuery(query) {
-  if (timeWindowSelection.value === "ALL") return query;
-
-  const refDate = new Date(currentReferenceDate.value);
-  let startDate = null;
-  let endDate = null;
-
-  switch (timeWindowSelection.value) {
-    case "D":
-      startDate = new Date(
-        refDate.getFullYear(),
-        refDate.getMonth(),
-        refDate.getDate(),
-        0,
-        0,
-        0,
-      );
-      endDate = new Date(
-        refDate.getFullYear(),
-        refDate.getMonth(),
-        refDate.getDate(),
-        23,
-        59,
-        59,
-      );
-      break;
-    case "W": {
-      const start = getStartOfWeek(refDate);
-      startDate = new Date(start.setHours(0, 0, 0, 0));
-
-      const end = new Date(start);
-      end.setDate(end.getDate() + 6);
-      endDate = new Date(end.setHours(23, 59, 59, 999));
-      break;
-    }
-    case "M":
-      startDate = new Date(
-        refDate.getFullYear(),
-        refDate.getMonth(),
-        1,
-        0,
-        0,
-        0,
-      );
-      endDate = new Date(
-        refDate.getFullYear(),
-        refDate.getMonth() + 1,
-        0,
-        23,
-        59,
-        59,
-      );
-      break;
-    case "Y":
-      startDate = new Date(refDate.getFullYear(), 0, 1);
-      endDate = new Date(refDate.getFullYear(), 11, 31, 23, 59, 59);
-      break;
-  }
-
-  if (startDate && endDate) {
-    query = query
-      .gte("start_time", startDate.getTime())
-      .lte("start_time", endDate.getTime());
-  }
-
-  return query;
-}
-
 function startEditing(session) {
   editingSessionId.value = session.id;
 
@@ -196,42 +127,53 @@ async function saveSession() {
   };
 
   if (editFormData.value.date) {
-    updates.start_time = new Date(editFormData.value.date).getTime();
+    updates.start_time = new Date(editFormData.value.date).toISOString();
   }
 
   if (editFormData.value.projectName) {
-    const { data } = await supabase
-      .from("projects")
-      .select("id")
-      .eq("name", editFormData.value.projectName)
-      .eq("user_id", user.id);
-
     let projectId = null;
 
-    if (data.length === 0) {
-      const response = await supabase
-        .from("projects")
-        .insert({ name: editFormData.value.projectName, user_id: user.id })
-        .select("id");
-      projectId = response.data[0].id;
-    } else {
-      projectId = data[0].id;
+    try {
+      const response = await API.get(`projects`, {
+        params: { name: editFormData.value.projectName },
+      });
+      if (response.data) {
+        projectId = response.data.id;
+      } else {
+        const createResponse = await API.post(`projects`, {
+          project: {
+            name: editFormData.value.projectName,
+          },
+        });
+        projectId = createResponse.data.id;
+      }
+    } catch (error) {
+      console.log(error);
     }
 
     updates.project_id = projectId;
+  } else {
+    updates.project_id = null;
   }
 
-  await supabase
-    .from("sessions")
-    .update(updates)
-    .eq("id", editingSessionId.value);
+  try {
+    await API.patch(`sessions/${editingSessionId.value}`, {
+      session: updates,
+    });
 
-  cancelEditing();
-  await fetchSessions(true);
+    cancelEditing();
+    await fetchSessions(true);
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 async function deleteSession() {
-  await supabase.from("sessions").delete().eq("id", editingSessionId.value);
+  try {
+    await API.delete(`sessions/${editingSessionId.value}`);
+  } catch (error) {
+    console.log(error);
+  }
 
   allSessions.value = allSessions.value.filter(
     (s) => s.id !== editingSessionId.value,
@@ -242,36 +184,38 @@ async function deleteSession() {
 }
 
 async function showProjectTime() {
-  let projectId = null;
-  if (projectSelection.value !== "all projects") {
-    const { data } = await supabase
-      .from("projects")
-      .select("id")
-      .eq("name", projectSelection.value)
-      .eq("user_id", user.id);
-
-    if (data && data.length > 0) {
-      projectId = data[0].id;
+  try {
+    let projectId = null;
+    if (projectSelection.value !== "all projects") {
+      try {
+        const response = await API.get(`projects`, {
+          params: { name: projectSelection.value },
+        });
+        if (response.data) {
+          projectId = response.data.id;
+        }
+      } catch (error) {
+        console.log(error);
+      }
     }
-  }
 
-  let query = supabase
-    .from("sessions")
-    .select("duration")
-    .eq("user_id", user.id);
-  query = applyDateFiltersToQuery(query);
-  if (projectId) {
-    query = query.eq("project_id", projectId);
-  }
-
-  const { data } = await query;
-
-  if (data) {
-    let totalDuration = 0;
-    data.forEach((session) => {
-      totalDuration += session.duration;
+    const queryParams = new URLSearchParams({
+      time_window: timeWindowSelection.value,
+      date: currentReferenceDate.value.toISOString(),
     });
-    timeDisplay.value = formatDuration(totalDuration);
+
+    if (projectId) {
+      queryParams.append("project_id", projectId);
+    }
+
+    const response = await API.get(
+      `sessions/summary?${queryParams.toString()}`,
+    );
+
+    timeDisplay.value = formatDuration(response.data.total_duration);
+  } catch (error) {
+    console.log(error);
+    timeDisplay.value = formatDuration(0);
   }
 }
 
@@ -287,43 +231,44 @@ async function fetchSessions(reset = false) {
   }
 
   try {
+    const limit = sessionsPerPage.value;
     const offset = currentPage.value * sessionsPerPage.value;
-    const rangeEnd = offset + sessionsPerPage.value - 1;
 
     let projectId = null;
     if (projectSelection.value !== "all projects") {
-      const { data } = await supabase
-        .from("projects")
-        .select("id")
-        .eq("name", projectSelection.value)
-        .eq("user_id", user.id);
-      if (data && data.length > 0) {
-        projectId = data[0].id;
+      try {
+        const response = await API.get(`projects`, {
+          params: { name: projectSelection.value },
+        });
+        if (response.data) {
+          projectId = response.data.id;
+        }
+      } catch (error) {
+        console.log(error);
       }
     }
 
-    let query = supabase
-      .from("sessions")
-      .select("id, start_time, duration, description, project_id")
-      .eq("user_id", user.id);
-    query = applyDateFiltersToQuery(query);
+    const queryParams = new URLSearchParams({
+      limit: limit,
+      offset: offset,
+      time_window: timeWindowSelection.value,
+      date: currentReferenceDate.value.toISOString(),
+    });
+
     if (projectId) {
-      query = query.eq("project_id", projectId);
+      queryParams.append("project_id", projectId);
     }
 
-    const { data, error } = await query
-      .order("start_time", { ascending: false })
-      .range(offset, rangeEnd);
+    const response = await API.get(`sessions?${queryParams.toString()}`);
+    const data = response.data;
 
     if (data && data.length > 0) {
       allSessions.value = [...allSessions.value, ...data];
       currentPage.value++;
-      if (data.length < sessionsPerPage.value) {
+
+      if (data.length < limit) {
         canLoadMore.value = false;
       }
-    } else if (error) {
-      console.error("Error while loading sessions: ", error.message);
-      canLoadMore.value = false;
     } else {
       canLoadMore.value = false;
     }
@@ -332,8 +277,8 @@ async function fetchSessions(reset = false) {
       ...new Set(data.map((s) => s.project_id).filter((id) => id != null)),
     ];
     uniqueProjectIds.forEach((id) => fetchProjectName(id));
-  } catch (e) {
-    console.error(e);
+  } catch (error) {
+    console.log(error);
     canLoadMore.value = false;
   } finally {
     isLoadingSessions.value = false;
@@ -349,13 +294,13 @@ async function fetchProjectName(projectId) {
     return;
   }
 
-  const { data } = await supabase
-    .from("projects")
-    .select("name")
-    .eq("id", projectId);
-
-  if (data && data.length > 0) {
-    projectNamesCache.value[projectId] = data[0].name;
+  try {
+    const response = await API.get(`projects/${encodeURIComponent(projectId)}`);
+    if (response.data && response.data.name) {
+      projectNamesCache.value[projectId] = response.data.name;
+    }
+  } catch (error) {
+    console.log(error);
   }
 }
 
@@ -387,19 +332,21 @@ function getDisplayDate(session) {
 }
 
 async function createNewSession() {
-  const { data } = await supabase
-    .from("sessions")
-    .insert({
-      duration: undefined,
-      description: undefined,
-      project_id: undefined,
-      start_time: new Date().getTime(),
-      user_id: user.id,
-    })
-    .select("id");
+  try {
+    const session = await API.post("sessions", {
+      session: {
+        duration: undefined,
+        description: undefined,
+        project_id: undefined,
+        start_time: new Date().toISOString(),
+      },
+    });
 
-  editingSessionId.value = data[0].id;
-  await fetchSessions(true);
+    editingSessionId.value = session.data.id;
+    await fetchSessions(true);
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function refreshDataAfterProjectChange() {

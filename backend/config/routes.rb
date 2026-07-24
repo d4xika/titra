@@ -11,5 +11,13 @@ Rails.application.routes.draw do
         put :logout
       end
     end
+
+    resources :projects, only: [ :index, :show, :create, :update, :destroy ], param: :name
+
+    resources :sessions, only: [ :index, :create, :update, :destroy ] do
+      collection do
+        get :summary
+      end
+    end
   end
 end

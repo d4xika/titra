@@ -1,10 +1,10 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted, computed } from "vue";
 import circleButton from "@/components/buttons/circleButton.vue";
 import finishedTimerModal from "@/modals/finishedTimerModal.vue";
 import resetTimerModal from "@/modals/resetTimerModal.vue";
 import iconButton from "@/components/buttons/iconButton.vue";
-import { saveSession } from "@/supabase";
+import API from "@/helper/api.js";
 
 const timerSelection = ref("pi pi-stopwatch");
 const selectButtonKey = ref(0);
@@ -19,7 +19,10 @@ const timer = ref({
   finished: false,
   reset: false,
   elapsedBeforePause: 0,
-  activeTimer: false,
+});
+
+const isTimerActive = computed(() => {
+  return timer.value.running || timer.value.elapsedBeforePause > 0;
 });
 const intervalId = ref(null);
 
@@ -29,7 +32,6 @@ function startTimer() {
   timer.value.startTime = now - timer.value.elapsedBeforePause * 1000;
   timer.value.running = true;
   timer.value.finished = false;
-  timer.value.activeTimer = true;
 
   localStorage.setItem("timerStartTime", timer.value.startTime);
   localStorage.setItem("timerRunning", "true");
@@ -46,7 +48,7 @@ function pauseTimer() {
   if (!timer.value.running) return;
 
   timer.value.running = false;
-  clearInterval(intervalId);
+  clearInterval(intervalId.value);
 
   timer.value.elapsedBeforePause = Math.floor(
     (Date.now() - timer.value.startTime) / 1000,
@@ -65,7 +67,6 @@ function resetTimer() {
   timer.value.display = "00:00";
   timer.value.finished = false;
   timer.value.reset = false;
-  timer.value.activeTimer = false;
 
   localStorage.removeItem("timerStartTime");
   localStorage.removeItem("elapsedBeforePause");
@@ -73,15 +74,25 @@ function resetTimer() {
 }
 
 async function stopTimer() {
-  sessionId.value = await saveSession(
-    timer.value.startTime,
-    timer.value.elapsedBeforePause,
-    null,
-    null,
-  );
-  resetTimer();
-  timer.value.finished = true;
-  timer.value.activeTimer = false;
+  try {
+    const startTime = timer.value.startTime
+      ? new Date(timer.value.startTime)
+      : new Date();
+    const session = await API.post("sessions", {
+      session: {
+        start_time: startTime.toISOString(),
+        duration: timer.value.elapsedBeforePause,
+        project_id: null,
+        description: null,
+      },
+    });
+
+    sessionId.value = session.data.id;
+    resetTimer();
+    timer.value.finished = true;
+  } catch (error) {
+    console.log(error);
+  }
 }
 
 function updateTimerDisplay() {
@@ -109,25 +120,27 @@ function formatElapsed(seconds) {
   return `${mins}:${secs}`;
 }
 
-const wasRunning = localStorage.getItem("timerRunning") === "true";
-const savedStartTime = localStorage.getItem("timerStartTime");
-const savedElapsed = localStorage.getItem("elapsedBeforePause");
+onMounted(() => {
+  const wasRunning = localStorage.getItem("timerRunning") === "true";
+  const savedStartTime = localStorage.getItem("timerStartTime");
+  const savedElapsed = localStorage.getItem("elapsedBeforePause");
 
-timer.value.elapsedBeforePause = savedElapsed ? parseInt(savedElapsed) : 0;
+  timer.value.elapsedBeforePause = savedElapsed ? parseInt(savedElapsed) : 0;
 
-if (wasRunning && savedStartTime) {
-  timer.value.startTime = parseInt(savedStartTime);
-  timer.value.running = true;
+  if (wasRunning && savedStartTime) {
+    timer.value.startTime = parseInt(savedStartTime);
+    timer.value.running = true;
 
-  intervalId.value = setInterval(() => {
+    intervalId.value = setInterval(() => {
+      updateTimerDisplay();
+    }, 1000);
+
     updateTimerDisplay();
-  }, 1000);
-
-  updateTimerDisplay();
-} else {
-  timer.value.running = false;
-  timer.value.display = formatElapsed(timer.value.elapsedBeforePause);
-}
+  } else {
+    timer.value.running = false;
+    timer.value.display = formatElapsed(timer.value.elapsedBeforePause);
+  }
+});
 
 function handleSelectButtonUpdate(nextVal) {
   if (!nextVal || nextVal === timerSelection.value) {
@@ -147,7 +160,7 @@ function handleSelectButtonUpdate(nextVal) {
     />
     <div class="mainContainer">
       <SelectButton
-        :disabled="timer.activeTimer"
+        :disabled="isTimerActive"
         :modelValue="timerSelection"
         @update:modelValue="handleSelectButtonUpdate"
         :key="selectButtonKey"
@@ -172,7 +185,7 @@ function handleSelectButtonUpdate(nextVal) {
         />
       </div>
       <div id="timerBox">
-        <p v-if="timerSelection === 'pi pi-stopwatch' || timer.activeTimer">
+        <p v-if="timerSelection === 'pi pi-stopwatch' || isTimerActive">
           {{ timer.display }}
         </p>
         <input

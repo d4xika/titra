@@ -1,7 +1,5 @@
 <script setup>
 import { ref } from "vue";
-import { supabase } from "@/supabase";
-import iconButton from "@/components/buttons/iconButton.vue";
 import DynamicModal from "@/modals/dynamicModal.vue";
 import textButton from "@/components/buttons/textButton.vue";
 import { useRouter } from "vue-router";
@@ -45,31 +43,6 @@ if (user && user.username) {
   router.push("/home");
 }
 
-async function verifyUsername() {
-  if (username.value === "") {
-    return;
-  }
-
-  const { data } = await supabase
-    .from("users")
-    .select("username, id")
-    .eq("username", username.value);
-
-  if (data.length === 0) {
-    const { data } = await supabase
-      .from("users")
-      .insert({ username: username.value })
-      .select();
-
-    const userObject = { username: username.value, id: data[0].id };
-    localStorage.setItem("user", JSON.stringify(userObject));
-    router.push("/home");
-  } else {
-    userData.value = data[0];
-    showUserKnownModal.value = true;
-  }
-}
-
 function loginUser() {
   console.log(userData.value.username);
   const userObject = {
@@ -90,18 +63,12 @@ async function registerNew() {
       email: emailNew.value,
     }).then(
       (response) => {
-        console.log(response);
         localStorage.setItem("user", JSON.stringify(response.data));
         setAuthStatus(true);
         router.push("/home");
-        console.log(localStorage.getItem("user"));
       },
       (error) => {
-        if (error.status === 409) {
-          // help
-        } else {
-          // help
-        }
+        console.log(error);
       },
     );
   });
@@ -116,11 +83,9 @@ async function loginNew() {
       password: passwordNew.value,
     }).then(
       (response) => {
-        console.log(response);
         localStorage.setItem("user", JSON.stringify(response.data));
         setAuthStatus(true);
         router.push("/home");
-        console.log(localStorage.getItem("user"));
       },
       (error) => {
         if (error.status === 409) {
@@ -144,10 +109,6 @@ async function loginNew() {
     <p class="welcomeText">
       Welcome friend!<br />Do I already know you?<br />What's your name?
     </p>
-    <div class="signInContainer">
-      <input v-model="username" class="inputBox" type="text" />
-      <iconButton @click="verifyUsername()" icon="pi pi-sign-in"></iconButton>
-    </div>
   </div>
 
   <button @click="startLiveActivity()">start activity</button>
@@ -198,26 +159,6 @@ async function loginNew() {
   font-family: "Chakra Petch", sans-serif;
   font-weight: 550;
   font-style: normal;
-}
-
-.inputBox {
-  background-color: #2c3e50;
-  color: lightgrey;
-  font-size: large;
-  width: 150px;
-  height: 40px;
-  text-align: center;
-  border-radius: 10px;
-  border: none;
-}
-
-.inputBox:focus {
-  outline: none;
-}
-
-input::placeholder {
-  color: rgba(211, 211, 211, 0.9);
-  font-size: x-large;
 }
 
 .welcomeViewContainer {
