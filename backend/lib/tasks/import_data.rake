@@ -13,11 +13,11 @@ namespace :import_data do
         project = Project.create!(id: row["id"], name: row["name"], user: katja)
 
         stats[:created] += 1
-        Log.success("Project created: #{project.name}")
+        puts "Project created: #{project.name}"
       end
     end
     puts "---"
-    Log.success("Projects created: #{stats[:created]}")
+    puts "Projects created: #{stats[:created]}"
   end
 
   task import_sessions: :environment do
@@ -53,11 +53,11 @@ namespace :import_data do
         session.save!
 
         stats[:created] += 1
-        Log.success("Session created: #{session.description}")
+        puts "Session created: #{session.description}"
       end
     end
     puts "---"
-    Log.success("Sessions created: #{stats[:created]}")
+    puts "Sessions created: #{stats[:created]}"
   end
 end
 

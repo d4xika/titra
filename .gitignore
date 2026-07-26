@@ -31,4 +31,4 @@ backend/.kamal
 backend/test
 backend/storage
 .keep
-.Gemfile.lock
+backend/Gemfile.lock
