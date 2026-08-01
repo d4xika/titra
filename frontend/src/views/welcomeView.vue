@@ -6,17 +6,18 @@ import { useRouter } from "vue-router";
 import { LiveActivities } from "live-activities";
 import API from "@/helper/api.js";
 import { setAuthStatus } from "@/router/router.js";
+import TTDrawer from "@/components/TTDrawer.vue";
 
 const router = useRouter();
-const showUserKnownModal = ref(false);
-const username = ref("");
 const user = JSON.parse(localStorage.getItem("user"));
-const userData = ref(null);
 const activityId = ref(null);
+const showLoginModal = ref(false);
+const showRegisterModal = ref(false);
 
 const usernameNew = ref("");
 const emailNew = ref("");
 const passwordNew = ref("");
+const passwordRepeat = ref("");
 
 async function startLiveActivity() {
   const res = await LiveActivities.start({
@@ -43,17 +44,21 @@ if (user && user.username) {
   router.push("/home");
 }
 
-function loginUser() {
-  console.log(userData.value.username);
-  const userObject = {
-    username: userData.value.username,
-    id: userData.value.id,
-  };
-  localStorage.setItem("user", JSON.stringify(userObject));
-  router.push("/home");
-}
+async function register() {
+  if (
+    usernameNew.value.length === 0 ||
+    emailNew.value.length === 0 ||
+    passwordNew.value.length === 0
+  ) {
+    //addtoast
+    return;
+  }
 
-async function registerNew() {
+  if (passwordNew.value !== passwordRepeat.value) {
+    //addtoast
+    return;
+  }
+
   API.get("csrf").then((response) => {
     API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
 
@@ -74,7 +79,12 @@ async function registerNew() {
   });
 }
 
-async function loginNew() {
+async function login() {
+  if (usernameNew.value.length === 0 || passwordNew.value.length === 0) {
+    //addtoast
+    return;
+  }
+
   API.get("csrf").then((response) => {
     API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
 
@@ -106,81 +116,82 @@ async function loginNew() {
       src="/img/kitties/happyKitty.gif"
       alt="happy kitty"
     />
-    <p class="welcomeText">
-      Welcome friend!<br />Do I already know you?<br />What's your name?
+    <p class="welcomeText">Welcome friend!<br />Do I already know you?</p>
+
+    <textButton @click="showLoginModal = true" text="Yes I'm back!" />
+    <p @click="showRegisterModal = true" class="new-text">
+      No, nice to meet you!
     </p>
   </div>
-
+  <!--
   <button @click="startLiveActivity()">start activity</button>
   <button @click="updateActivity()">update activity</button>
   <button @click="endActivity()">end activity</button>
 
-  X {{ activityId }} X
+  X {{ activityId }} X-->
 
-  <div style="display: flex; flex-direction: column; gap: 10px">
-    <input v-model="usernameNew" type="text" />
-    <input v-model="emailNew" type="text" />
-    <input v-model="passwordNew" type="text" />
-    <button @click="registerNew()">register</button>
-  </div>
-
-  <div style="display: flex; flex-direction: column; gap: 10px">
-    <input v-model="usernameNew" type="text" />
-    <input v-model="passwordNew" type="text" />
-    <button @click="loginNew()">login</button>
-  </div>
-
-  <dynamic-modal
-    v-if="showUserKnownModal"
-    @closeModal="showUserKnownModal = false"
-  >
-    <template #content>
-      <p>I already know a {{ username }}!<br />Is it you?</p>
-      <div class="buttonsContainer">
-        <textButton
-          @click="loginUser()"
-          variant="lightVersion"
-          text="Yes!"
-        ></textButton>
-        <textButton
-          @click="showUserKnownModal = false"
-          variant="lightVersion"
-          text="No"
-        ></textButton>
+  <TTDrawer title="Login" v-model="showLoginModal">
+    <template #body>
+      <div class="auth-modal">
+        <TTTextInput label="Username" v-model="usernameNew" />
+        <TTTextInput label="Password" v-model="passwordNew" type="password" />
+        <div class="submit-button-container">
+          <TextButton @click="login()" text="Submit" variant="lightVersion" />
+        </div>
       </div>
     </template>
-  </dynamic-modal>
+  </TTDrawer>
+  <TTDrawer title="Register" v-model="showRegisterModal">
+    <template #body>
+      <div class="auth-modal">
+        <TTTextInput label="Username" v-model="usernameNew" />
+        <TTTextInput label="E-Mail" name="email" v-model="emailNew" />
+        <TTTextInput label="Password" v-model="passwordNew" type="password" />
+        <TTTextInput
+          label="Repeat Password"
+          v-model="passwordRepeat"
+          type="password"
+        />
+        <div class="submit-button-container">
+          <TextButton
+            @click="register()"
+            text="Register"
+            variant="lightVersion"
+          />
+        </div>
+      </div>
+    </template>
+  </TTDrawer>
 </template>
 
 <style scoped>
-.welcomeText {
-  font-size: x-large;
-  color: #2c3e50;
-  font-family: "Chakra Petch", sans-serif;
-  font-weight: 550;
-  font-style: normal;
-}
-
 .welcomeViewContainer {
   display: flex;
   align-items: center;
   flex-direction: column;
   margin-top: 140px;
+
+  .welcomeText {
+    font-size: x-large;
+    color: var(--primary-color);
+    font-weight: 550;
+    font-style: normal;
+  }
+
+  .new-text {
+    color: var(--primary-color);
+    font-weight: 550;
+    font-style: normal;
+  }
 }
 
-.signInContainer {
+.auth-modal {
   display: flex;
-  align-items: center;
-  flex-direction: row;
-  gap: 10px;
-}
+  flex-direction: column;
+  gap: calc(var(--gap-2) + var(--gap-1));
 
-.buttonsContainer {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: row;
-  gap: 20px;
+  .submit-button-container {
+    padding-top: var(--gap-2);
+  }
 }
 </style>

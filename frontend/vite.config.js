@@ -1,17 +1,23 @@
 import { defineConfig } from "vite";
+import { PrimeVueResolver } from "@primevue/auto-import-resolver";
 import vue from "@vitejs/plugin-vue";
+import Components from "unplugin-vue-components/vite";
 import { VitePWA } from "vite-plugin-pwa";
 import { fileURLToPath, URL } from "node:url";
 
 export default defineConfig({
   plugins: [
     vue(),
+    Components({
+      resolvers: [PrimeVueResolver()],
+      dirs: ["src/components", "src/views/sections"],
+      extensions: ["vue"],
+      deep: true,
+      dts: true,
+    }),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: [
-        "img/icons/kittyIconBlue_192x192.png",
-        "img/icons/kittyIconBlue_512x512.png",
-      ],
+      includeAssets: ["img/icons/kitty-icon-new.png"],
       manifest: {
         name: "Titra",
         short_name: "Titra",
@@ -20,14 +26,7 @@ export default defineConfig({
         display: "standalone",
         icons: [
           {
-            src: "img/icons/kittyIconBlue_192x192.png",
-            sizes: "192x192",
-            type: "image/png",
-            purpose: "any",
-          },
-          {
-            src: "img/icons/kittyIconBlue_512x512.png",
-            sizes: "512x512",
+            src: "img/icons/kitty-icon-new.png",
             type: "image/png",
             purpose: "any",
           },
