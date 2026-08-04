@@ -1,5 +1,5 @@
 <script setup>
-import iconButton from "@/components/buttons/iconButton.vue";
+import TtIconButton from "../components/buttons/TTIconButton.vue";
 import textButton from "@/components/buttons/textButton.vue";
 import { ref, computed } from "vue";
 import selectProjectModal from "@/modals/selectProjectModal.vue";
@@ -358,7 +358,11 @@ function refreshDataAfterProjectChange() {
 
 <template>
   <div class="mainContainer">
-    <iconButton @click="$router.push('/')" id="backButton" icon="pi pi-clock" />
+    <TtIconButton
+      @click="$router.push('/')"
+      id="backButton"
+      icon="pi pi-clock"
+    />
     <div class="timeWindows">
       <SelectButton
         :modelValue="timeWindowSelection"
@@ -381,11 +385,11 @@ function refreshDataAfterProjectChange() {
     <div class="timeContainer">
       <p class="timeDisplayText">{{ timeDisplay }}</p>
     </div>
-    <iconButton
+    <TtIconButton
       @click="selectingProject = true"
       class="projectSelectionContainer"
       icon="pi pi-briefcase"
-      >{{ projectSelection }}</iconButton
+      >{{ projectSelection }}</TtIconButton
     >
 
     <ul class="sessionListContainer">
@@ -477,11 +481,11 @@ function refreshDataAfterProjectChange() {
     />
   </div>
 
-  <iconButton
+  <TtIconButton
     @click="createNewSession()"
     icon="pi pi-plus"
     class="addSessionButton"
-  ></iconButton>
+  ></TtIconButton>
 
   <selectProjectModal
     v-if="selectingProject"

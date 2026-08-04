@@ -9,14 +9,13 @@ import { setAuthStatus } from "@/router/router.js";
 import TTDrawer from "@/components/TTDrawer.vue";
 
 const router = useRouter();
-const user = JSON.parse(localStorage.getItem("user"));
 const activityId = ref(null);
 const showLoginModal = ref(false);
 const showRegisterModal = ref(false);
 
-const usernameNew = ref("");
-const emailNew = ref("");
-const passwordNew = ref("");
+const username = ref("");
+const email = ref("");
+const password = ref("");
 const passwordRepeat = ref("");
 
 async function startLiveActivity() {
@@ -25,7 +24,6 @@ async function startLiveActivity() {
   });
 
   activityId.value = res.activityId;
-  console.log("Started Live Activity:", res);
   return res;
 }
 
@@ -40,21 +38,17 @@ async function endActivity() {
   await LiveActivities.end({ activityId: activityId.value });
 }
 
-if (user && user.username) {
-  router.push("/home");
-}
-
 async function register() {
   if (
-    usernameNew.value.length === 0 ||
-    emailNew.value.length === 0 ||
-    passwordNew.value.length === 0
+    username.value.length === 0 ||
+    email.value.length === 0 ||
+    password.value.length === 0
   ) {
     //addtoast
     return;
   }
 
-  if (passwordNew.value !== passwordRepeat.value) {
+  if (password.value !== passwordRepeat.value) {
     //addtoast
     return;
   }
@@ -63,9 +57,9 @@ async function register() {
     API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
 
     API.post("users/register", {
-      username: usernameNew.value,
-      password: passwordNew.value,
-      email: emailNew.value,
+      username: username.value,
+      password: password.value,
+      email: email.value,
     }).then(
       (response) => {
         localStorage.setItem("user", JSON.stringify(response.data));
@@ -80,7 +74,7 @@ async function register() {
 }
 
 async function login() {
-  if (usernameNew.value.length === 0 || passwordNew.value.length === 0) {
+  if (username.value.length === 0 || password.value.length === 0) {
     //addtoast
     return;
   }
@@ -89,8 +83,8 @@ async function login() {
     API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
 
     API.post("users/login", {
-      username: usernameNew.value,
-      password: passwordNew.value,
+      username: username.value,
+      password: password.value,
     }).then(
       (response) => {
         localStorage.setItem("user", JSON.stringify(response.data));
@@ -110,19 +104,22 @@ async function login() {
 </script>
 
 <template>
-  <div class="welcomeViewContainer">
-    <img
-      style="height: 180px"
-      src="/img/kitties/happyKitty.gif"
-      alt="happy kitty"
-    />
-    <p class="welcomeText">Welcome friend!<br />Do I already know you?</p>
+  <div class="welcome-view">
+    <div class="content-container">
+      <img
+        style="height: 180px"
+        src="/img/kitties/happyKitty.gif"
+        alt="happy kitty"
+      />
+      <p class="welcome-text">Welcome friend!<br />Do I already know you?</p>
 
-    <textButton @click="showLoginModal = true" text="Yes I'm back!" />
-    <p @click="showRegisterModal = true" class="new-text">
-      No, nice to meet you!
-    </p>
+      <textButton @click="showLoginModal = true" text="Yes I'm back!" />
+      <p @click="showRegisterModal = true" class="new-text">
+        No, nice to meet you!
+      </p>
+    </div>
   </div>
+
   <!--
   <button @click="startLiveActivity()">start activity</button>
   <button @click="updateActivity()">update activity</button>
@@ -133,8 +130,8 @@ async function login() {
   <TTDrawer title="Login" v-model="showLoginModal">
     <template #body>
       <div class="auth-modal">
-        <TTTextInput label="Username" v-model="usernameNew" />
-        <TTTextInput label="Password" v-model="passwordNew" type="password" />
+        <TTTextInput label="Username" v-model="username" />
+        <TTTextInput label="Password" v-model="password" type="password" />
         <div class="submit-button-container">
           <TextButton @click="login()" text="Submit" variant="lightVersion" />
         </div>
@@ -144,9 +141,9 @@ async function login() {
   <TTDrawer title="Register" v-model="showRegisterModal">
     <template #body>
       <div class="auth-modal">
-        <TTTextInput label="Username" v-model="usernameNew" />
-        <TTTextInput label="E-Mail" name="email" v-model="emailNew" />
-        <TTTextInput label="Password" v-model="passwordNew" type="password" />
+        <TTTextInput label="Username" v-model="username" />
+        <TTTextInput label="E-Mail" name="email" v-model="email" />
+        <TTTextInput label="Password" v-model="password" type="password" />
         <TTTextInput
           label="Repeat Password"
           v-model="passwordRepeat"
@@ -165,23 +162,25 @@ async function login() {
 </template>
 
 <style scoped>
-.welcomeViewContainer {
+.welcome-view {
   display: flex;
   align-items: center;
-  flex-direction: column;
-  margin-top: 140px;
+  justify-content: center;
+  height: 100dvh;
 
-  .welcomeText {
-    font-size: x-large;
-    color: var(--primary-color);
-    font-weight: 550;
-    font-style: normal;
-  }
+  .content-container {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
 
-  .new-text {
-    color: var(--primary-color);
-    font-weight: 550;
-    font-style: normal;
+    .welcome-text {
+      font-size: var(--font-size-2);
+      color: var(--primary-color);
+    }
+
+    .new-text {
+      color: var(--primary-color);
+    }
   }
 }
 

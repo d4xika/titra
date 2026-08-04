@@ -3,7 +3,7 @@ import { ref, onMounted, computed } from "vue";
 import circleButton from "@/components/buttons/circleButton.vue";
 import finishedTimerModal from "@/modals/finishedTimerModal.vue";
 import resetTimerModal from "@/modals/resetTimerModal.vue";
-import iconButton from "@/components/buttons/iconButton.vue";
+import TtIconButton from "../components/buttons/TTIconButton.vue";
 import API from "@/helper/api.js";
 
 const timerSelection = ref("pi pi-stopwatch");
@@ -153,23 +153,24 @@ function handleSelectButtonUpdate(nextVal) {
 
 <template>
   <div>
-    <iconButton
+    <TTIconButton
       @click="$router.push('savedSessions')"
       id="listButton"
       icon="pi pi-list"
+      variant="square"
     />
     <div class="mainContainer">
-      <SelectButton
+      <TTSelectButton
         :disabled="isTimerActive"
         :modelValue="timerSelection"
-        @update:modelValue="handleSelectButtonUpdate"
+        @update:model-value="handleSelectButtonUpdate"
         :key="selectButtonKey"
         :options="['pi pi-stopwatch', 'pi pi-hourglass']"
       >
         <template #option="slotProps">
           <i :class="slotProps.option"></i>
         </template>
-      </SelectButton>
+      </TTSelectButton>
       <div>
         <img
           v-if="timer.running"

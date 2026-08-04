@@ -11,17 +11,22 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    AutoComplete: typeof import('primevue/autocomplete')['default']
     CircleButton: typeof import('./src/components/buttons/circleButton.vue')['default']
     CloseButton: typeof import('./src/components/buttons/closeButton.vue')['default']
+    DatePicker: typeof import('primevue/datepicker')['default']
     Drawer: typeof import('primevue/drawer')['default']
     FloatLabel: typeof import('primevue/floatlabel')['default']
-    IconButton: typeof import('./src/components/buttons/iconButton.vue')['default']
+    InputNumber: typeof import('primevue/inputnumber')['default']
     InputText: typeof import('primevue/inputtext')['default']
     Password: typeof import('primevue/password')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SelectButton: typeof import('primevue/selectbutton')['default']
     TextButton: typeof import('./src/components/buttons/textButton.vue')['default']
     TTDrawer: typeof import('./src/components/TTDrawer.vue')['default']
+    TTIconButton: typeof import('./src/components/buttons/TTIconButton.vue')['default']
+    TTSelectButton: typeof import('./src/components/TTSelectButton.vue')['default']
     TTTextInput: typeof import('./src/components/TTTextInput.vue')['default']
   }
 }

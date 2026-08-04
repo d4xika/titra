@@ -21,8 +21,8 @@ const model = defineModel({ type: Boolean, default: false });
 
 <style>
 .p-drawer {
-  border-top-left-radius: 10px !important;
-  border-top-right-radius: 10px !important;
+  border-top-left-radius: var(--border-radius-2) !important;
+  border-top-right-radius: var(--border-radius-2) !important;
   border: none !important;
   margin: 0 var(--gap-2) !important;
   background-color: var(--primary-color) !important;
