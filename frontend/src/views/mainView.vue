@@ -1,9 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import circleButton from "@/components/buttons/circleButton.vue";
 import finishedTimerModal from "@/modals/finishedTimerModal.vue";
 import resetTimerModal from "@/modals/resetTimerModal.vue";
-import TtIconButton from "../components/buttons/TTIconButton.vue";
 import API from "@/helper/api.js";
 
 const timerSelection = ref("pi pi-stopwatch");
@@ -152,14 +150,13 @@ function handleSelectButtonUpdate(nextVal) {
 </script>
 
 <template>
-  <div>
+  <div class="main-view">
     <TTIconButton
       @click="$router.push('savedSessions')"
-      id="listButton"
+      class="list-button"
       icon="pi pi-list"
-      variant="square"
     />
-    <div class="mainContainer">
+    <div class="main-container">
       <TTSelectButton
         :disabled="isTimerActive"
         :modelValue="timerSelection"
@@ -185,25 +182,28 @@ function handleSelectButtonUpdate(nextVal) {
           alt="sleeping kitty"
         />
       </div>
-      <div id="timerBox">
+      <div class="timer-box">
         <p v-if="timerSelection === 'pi pi-stopwatch' || isTimerActive">
           {{ timer.display }}
         </p>
         <input
           v-else
-          id="inputBox"
+          class="input-box"
           placeholder="min"
           v-model="countdownStartTime"
         />
       </div>
-    </div>
-    <div
-      style="display: flex; justify-content: center; gap: 7px; margin-top: 7px"
-    >
-      <circleButton @click="timer.reset = true" icon="restart" />
-      <circleButton @click="pauseTimer" v-if="timer.running" icon="pause" />
-      <circleButton @click="startTimer" v-else icon="resume" />
-      <circleButton @click="stopTimer" icon="stop" />
+
+      <div class="button-container">
+        <TTIconButton @click="timer.reset = true" icon="pi pi-replay" />
+        <TTIconButton
+          @click="pauseTimer"
+          v-if="timer.running"
+          icon="pi pi-pause"
+        />
+        <TTIconButton @click="startTimer" v-else icon="pi pi-play" />
+        <TTIconButton @click="stopTimer" icon="pi pi-stop" />
+      </div>
     </div>
   </div>
 
@@ -221,60 +221,61 @@ function handleSelectButtonUpdate(nextVal) {
 </template>
 
 <style scoped>
-.mainContainer {
+.main-view {
   display: flex;
-  justify-content: center;
-  align-items: center;
   flex-direction: column;
-  margin-top: 130px;
-}
-
-#timerBox {
-  background-color: #2c3e50;
-  display: flex;
-  justify-content: center;
   align-items: center;
-  width: 300px;
-  height: 150px;
-  border-radius: 15px;
-  margin-bottom: 10px;
-  margin-top: 10px;
-}
+  justify-content: center;
+  height: 100vh;
 
-#inputBox {
-  background-color: #2c3e50;
-  color: lightgrey;
-  font-size: xxx-large;
-  width: 140px;
-  height: 70px;
-  font-family: "Chakra Petch", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-  border: 1px solid lightblue;
-  border-radius: 15px;
-  text-align: center;
-}
+  .list-button {
+    position: fixed;
+    left: 2rem;
+    top: 2rem;
+  }
 
-#inputBox:focus {
-  outline: none;
-}
+  .main-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: var(--gap-2);
 
-input::placeholder {
-  color: rgba(211, 211, 211, 0.9);
-  font-size: x-large;
-}
+    .timer-box {
+      background-color: var(--primary-color);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 18rem;
+      height: 9rem;
+      border-radius: var(--border-radius-3);
+      font-size: var(--font-size-4);
+      box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.2);
+    }
 
-p {
-  color: lightgrey;
-  font-size: xxx-large;
-  font-family: "Chakra Petch", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
+    .input-box {
+      background-color: var(--primary-color);
+      color: var(--white);
+      font-size: var(--font-size-3);
+      width: 8rem;
+      height: 4rem;
+      border: 1px solid var(--secondary-color);
+      border-radius: var(--border-radius-3);
 
-#listButton {
-  position: fixed;
-  left: 30px;
-  top: 30px;
+      &:focus {
+        outline: none;
+      }
+
+      &::placeholder {
+        font-size: var(--font-size-2);
+      }
+    }
+
+    .button-container {
+      display: flex;
+      padding-top: var(--gap-1);
+      gap: var(--gap-2);
+    }
+  }
 }
 </style>

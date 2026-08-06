@@ -12,7 +12,6 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     AutoComplete: typeof import('primevue/autocomplete')['default']
-    CircleButton: typeof import('./src/components/buttons/circleButton.vue')['default']
     CloseButton: typeof import('./src/components/buttons/closeButton.vue')['default']
     DatePicker: typeof import('primevue/datepicker')['default']
     Drawer: typeof import('primevue/drawer')['default']
