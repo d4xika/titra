@@ -1,7 +1,6 @@
 <script setup>
 import { ref, onMounted } from "vue";
-import textButton from "@/components/buttons/textButton.vue";
-import API from "../helper/api.js";
+import API from "@/helper/api.js";
 
 const props = defineProps({
   initialSelection: {
@@ -157,7 +156,7 @@ onMounted(() => {
         </li>
       </ul>
 
-      <textButton
+      <TTTextButton
         class="textButton"
         @click="handleSelect"
         text="Select"

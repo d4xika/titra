@@ -1,14 +1,15 @@
 <script setup>
-import { ref } from "vue";
-import textButton from "@/components/buttons/textButton.vue";
-import API from "../helper/api.js";
+import { ref, computed } from "vue";
+import API from "@/helper/api.js";
 
+const props = defineProps({ id: { type: Number } });
+const model = defineModel({ type: Boolean, default: false });
 const emit = defineEmits(["closeModal"]);
+
 const projectName = ref("");
 const description = ref("");
 const allProjects = ref([]);
-const projects = ref([]);
-const props = defineProps({ id: { type: Number } });
+
 loadProjects();
 
 async function loadProjects() {
@@ -20,16 +21,17 @@ async function loadProjects() {
   }
 }
 
-function searchProject(event) {
-  const query = event.query.toLowerCase();
+const filteredProjects = computed(() => {
+  const query = projectName.value.toLowerCase();
+  if (!query) return allProjects.value;
 
-  projects.value = allProjects.value.filter((project) => {
-    return project.name.toLowerCase().includes(query);
-  });
-}
+  return allProjects.value.filter((project) =>
+    project.name.toLowerCase().includes(query),
+  );
+});
 
 async function updateProjectInfo() {
-  const projectNameString = projectName.value.name ?? projectName.value;
+  const projectNameString = projectName.value;
 
   if (!projectNameString) {
     await API.patch(`sessions/${props.id}`, {
@@ -70,98 +72,43 @@ async function updateProjectInfo() {
 </script>
 
 <template>
-  <div id="dimmBackground">
-    <div id="modal">
+  <TTDrawer title="Great job! So proud of you!" v-model="model">
+    <template #body class="finished-timer-modal">
       <img
         style="height: 150px; margin-top: -100px"
         src="/img/kitties/happyKitty.gif"
         alt="happy kitty"
       />
-      <p style="margin-top: -5px">Great job!</p>
-      <p style="margin-top: -20px">So proud of you!</p>
-      <div class="questionsContainer">
-        <div style="width: 100%">
-          <p class="headerQuestions">Project name</p>
-          <AutoComplete
-            class="autocompleteField"
-            v-model="projectName"
-            :suggestions="projects"
-            @complete="searchProject"
-            :virtualScrollerOptions="{ itemSize: 38 }"
-            optionLabel="name"
-            optionValue="name"
-            dropdown
-          />
-        </div>
-        <div style="width: 100%">
-          <p class="headerQuestions">Description</p>
-          <InputText v-model="description" class="descriptionField" />
-        </div>
-        <textButton
+      <div class="questions-container">
+        <TTAutoComplete
+          class="autocompleteField"
+          v-model="projectName"
+          :suggestions="filteredProjects"
+          optionLabel="name"
+          label="Project name"
+        />
+
+        <TTTextInput label="Description" v-model="description" />
+        <TTTextButton
           @click="
             updateProjectInfo();
             emit('closeModal');
           "
           variant="lightVersion"
           text="Save"
-        ></textButton>
+        ></TTTextButton>
       </div>
-    </div>
-  </div>
+    </template>
+  </TTDrawer>
 </template>
 
 <style scoped>
-#dimmBackground {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(34, 34, 34, 0.5);
-  backdrop-filter: blur(5px);
-  left: 0;
-  top: 0;
-}
-
-#modal {
-  position: relative;
-  justify-content: center;
-  align-content: center;
-  width: 300px;
-  padding-bottom: 30px;
-  border-radius: 15px;
-  background-color: #2c3e50;
-}
-
-p {
-  color: white;
-  font-size: x-large;
-  font-family: "Chakra Petch", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.questionsContainer {
+.questions-container {
   display: flex;
   align-items: center;
   flex-direction: column;
   width: 100%;
-  padding: 0 20px;
-  gap: 20px;
-}
-
-.headerQuestions {
-  font-size: large;
-  margin: 5px;
-}
-
-.autocompleteField {
-  --p-inputtext-focus-border-color: #2c3e50;
-  height: 35px;
-}
-
-.descriptionField {
-  height: 35px;
+  padding: 0 var(--gap-1);
+  gap: var(--gap-3);
 }
 </style>

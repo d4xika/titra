@@ -209,7 +209,7 @@ function handleSelectButtonUpdate(nextVal) {
 
   <finishedTimerModal
     :id="sessionId"
-    v-if="timer.finished"
+    v-model="timer.finished"
     @closeModal="timer.finished = false"
   />
   <resetTimerModal

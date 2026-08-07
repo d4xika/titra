@@ -1,7 +1,5 @@
 <script setup>
 import { ref } from "vue";
-import DynamicModal from "@/modals/dynamicModal.vue";
-import textButton from "@/components/buttons/textButton.vue";
 import { useRouter } from "vue-router";
 import { LiveActivities } from "live-activities";
 import API from "@/helper/api.js";
@@ -113,7 +111,7 @@ async function login() {
       />
       <p class="welcome-text">Welcome friend!<br />Do I already know you?</p>
 
-      <textButton @click="showLoginModal = true" text="Yes I'm back!" />
+      <TTTextButton @click="showLoginModal = true" text="Yes I'm back!" />
       <p @click="showRegisterModal = true" class="new-text">
         No, nice to meet you!
       </p>
@@ -133,11 +131,12 @@ async function login() {
         <TTTextInput label="Username" v-model="username" />
         <TTTextInput label="Password" v-model="password" type="password" />
         <div class="submit-button-container">
-          <TextButton @click="login()" text="Submit" variant="lightVersion" />
+          <TTTextButton @click="login()" text="Submit" variant="lightVersion" />
         </div>
       </div>
     </template>
   </TTDrawer>
+
   <TTDrawer title="Register" v-model="showRegisterModal">
     <template #body>
       <div class="auth-modal">
@@ -150,7 +149,7 @@ async function login() {
           type="password"
         />
         <div class="submit-button-container">
-          <TextButton
+          <TTTextButton
             @click="register()"
             text="Register"
             variant="lightVersion"

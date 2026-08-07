@@ -1,5 +1,5 @@
 <script setup>
-import textButton from "@/components/buttons/textButton.vue";
+import TtTextButton from "@/components/buttons/TTTextButton.vue";
 
 const emit = defineEmits(["closeModal"]);
 </script>
@@ -22,16 +22,16 @@ const emit = defineEmits(["closeModal"]);
           gap: 50px;
         "
       >
-        <textButton
+        <TtTextButton
           @click="emit('yesReset')"
           variant="lightVersion"
           text="Yes"
-        ></textButton>
-        <textButton
+        ></TtTextButton>
+        <TtTextButton
           @click="emit('noReset')"
           variant="lightVersion"
           text="No"
-        ></textButton>
+        ></TtTextButton>
       </div>
     </div>
   </div>

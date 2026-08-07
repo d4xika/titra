@@ -1,6 +1,4 @@
 <script setup>
-import TtIconButton from "../components/buttons/TTIconButton.vue";
-import textButton from "@/components/buttons/textButton.vue";
 import { ref, computed } from "vue";
 import selectProjectModal from "@/modals/selectProjectModal.vue";
 import API from "@/helper/api.js";
@@ -358,7 +356,7 @@ function refreshDataAfterProjectChange() {
 
 <template>
   <div class="mainContainer">
-    <TtIconButton
+    <TTIconButton
       @click="$router.push('/')"
       id="backButton"
       icon="pi pi-clock"
@@ -385,11 +383,11 @@ function refreshDataAfterProjectChange() {
     <div class="timeContainer">
       <p class="timeDisplayText">{{ timeDisplay }}</p>
     </div>
-    <TtIconButton
+    <TTIconButton
       @click="selectingProject = true"
       class="projectSelectionContainer"
       icon="pi pi-briefcase"
-      >{{ projectSelection }}</TtIconButton
+      >{{ projectSelection }}</TTIconButton
     >
 
     <ul class="sessionListContainer">
@@ -473,7 +471,7 @@ function refreshDataAfterProjectChange() {
       </li>
     </ul>
 
-    <textButton
+    <TTTextButton
       v-if="canLoadMore && !isLoadingSessions"
       @click="fetchSessions(false)"
       text="Load More"
@@ -481,11 +479,11 @@ function refreshDataAfterProjectChange() {
     />
   </div>
 
-  <TtIconButton
+  <TTIconButton
     @click="createNewSession()"
     icon="pi pi-plus"
     class="addSessionButton"
-  ></TtIconButton>
+  />
 
   <selectProjectModal
     v-if="selectingProject"

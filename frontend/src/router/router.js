@@ -5,17 +5,17 @@ const routes = [
   {
     path: "/home",
     name: "home",
-    component: () => import("@/views/mainView.vue"),
+    component: () => import("@/views/MainView.vue"),
   },
   {
     path: "/savedSessions",
     name: "savedSessions",
-    component: () => import("@/views/savedSessionsView.vue"),
+    component: () => import("@/views/SavedSessionsView.vue"),
   },
   {
     path: "/",
     name: "welcome",
-    component: () => import("@/views/welcomeView.vue"),
+    component: () => import("@/views/WelcomeView.vue"),
   },
 ];
 
