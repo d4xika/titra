@@ -88,6 +88,19 @@ function close() {
   >
     <template #body>
       <div class="add-session-container">
+        <div class="date-picker-container">
+          <TTDatePicker v-model="date" />
+          <p class="date-display">
+            {{
+              date.toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })
+            }}
+          </p>
+        </div>
+
         <TTAutoComplete
           v-model="projectName"
           :suggestions="filteredProjects"
@@ -103,8 +116,6 @@ function close() {
           suffix=" min"
           :min="0"
         />
-
-        <TTDatePicker v-model="date" />
 
         <TTTextButton
           @click="addSession"
@@ -124,6 +135,20 @@ function close() {
   width: 100%;
   padding: 0 var(--gap-1);
   gap: var(--gap-3);
-  margin-top: var(--gap-2);
+
+  .date-picker-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-self: flex-start;
+    gap: var(--gap-3);
+    padding-bottom: var(--gap-2);
+
+    .date-display {
+      font-size: var(--font-size-1-5);
+      color: var(--white);
+      margin: 0;
+    }
+  }
 }
 </style>

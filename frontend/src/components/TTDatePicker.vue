@@ -36,16 +36,6 @@ function updateDate(selectedDate) {
   />
 </template>
 
-<style scoped>
-.date-picker {
-  width: 100%;
-}
-
-:deep(.p-datepicker) {
-  width: 100%;
-}
-</style>
-
 <style>
 .p-datepicker-panel {
   font-family: "Chakra Petch", sans-serif !important;
@@ -61,9 +51,10 @@ function updateDate(selectedDate) {
 
 .p-datepicker-dropdown {
   border: none !important;
-  border-radius: 5px !important;
+  border-radius: var(--border-radius-1) !important;
   background-color: var(--secondary-color) !important;
   color: var(--primary-color) !important;
+  padding: var(--gap-2) !important;
 }
 
 .p-datepicker-day-selected,

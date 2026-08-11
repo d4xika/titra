@@ -143,6 +143,19 @@ function close() {
   >
     <template #body>
       <div class="edit-session-container">
+        <div class="date-picker-container">
+          <TTDatePicker v-model="date" />
+          <p class="date-display">
+            {{
+              date.toLocaleDateString("en-US", {
+                month: "long",
+                day: "numeric",
+                year: "numeric",
+              })
+            }}
+          </p>
+        </div>
+
         <TTAutoComplete
           v-model="projectName"
           :suggestions="filteredProjects"
@@ -158,8 +171,6 @@ function close() {
           suffix=" min"
           :min="0"
         />
-
-        <TTDatePicker v-model="date" />
 
         <div v-if="confirmingDelete" class="delete-confirmation">
           <span>Delete this session?</span>
@@ -201,21 +212,35 @@ function close() {
   width: 100%;
   padding: 0 var(--gap-1);
   gap: var(--gap-3);
-  margin-top: var(--gap-2);
-}
 
-.actions {
-  display: flex;
-  gap: var(--gap-2);
-  width: 100%;
-  justify-content: center;
-  margin-top: var(--gap-1);
-}
+  .date-picker-container {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    align-self: flex-start;
+    gap: var(--gap-3);
+    padding-bottom: var(--gap-2);
 
-.delete-confirmation {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--gap-1);
+    .date-display {
+      font-size: var(--font-size-1-5);
+      color: var(--white);
+      margin: 0;
+    }
+  }
+
+  .delete-confirmation {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--gap-1);
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--gap-2);
+    width: 100%;
+    justify-content: center;
+    margin-top: var(--gap-1);
+  }
 }
 </style>
