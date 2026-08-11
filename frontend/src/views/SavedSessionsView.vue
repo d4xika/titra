@@ -1,11 +1,14 @@
 <script setup>
 import { ref, computed } from "vue";
-import selectProjectModal from "@/modals/selectProjectModal.vue";
 import API from "@/helper/api.js";
+import SelectProjectModal from "@/modals/SelectProjectModal.vue";
+import AddSessionModal from "@/modals/AddSessionModal.vue";
+import EditSessionModal from "@/modals/EditSessionModal.vue";
 
 const timeWindowSelection = ref("D");
 const projectSelection = ref("all projects");
 const selectingProject = ref(false);
+const addingSession = ref(false);
 const selectButtonKey = ref(0);
 const allSessions = ref([]);
 const timeDisplay = ref("00 h 00 min");
@@ -14,13 +17,8 @@ const currentPage = ref(0);
 const canLoadMore = ref(true);
 const isLoadingSessions = ref(true);
 const projectNamesCache = ref({});
-const editingSessionId = ref(null);
-const editFormData = ref({
-  description: "",
-  projectName: "",
-  duration: "",
-  date: null,
-});
+const isEditModalOpen = ref(false);
+const selectedSession = ref(null);
 const currentReferenceDate = ref(new Date());
 showProjectTime();
 fetchSessions(true);
@@ -102,83 +100,9 @@ function handleProjectSelect(selectedProjectName) {
   fetchSessions(true);
 }
 
-function startEditing(session) {
-  editingSessionId.value = session.id;
-
-  editFormData.value = {
-    description: session.description,
-    projectName: getProjectNameFromCache(session.project_id),
-    duration: Math.floor(session.duration / 60),
-    date: session.start_time ? new Date(session.start_time) : null,
-  };
-}
-
-function cancelEditing() {
-  editingSessionId.value = null;
-  editFormData.value = {};
-}
-
-async function saveSession() {
-  const updates = {
-    duration: editFormData.value.duration * 60,
-    description: editFormData.value.description,
-  };
-
-  if (editFormData.value.date) {
-    updates.start_time = new Date(editFormData.value.date).toISOString();
-  }
-
-  if (editFormData.value.projectName) {
-    let projectId = null;
-
-    try {
-      const response = await API.get(`projects`, {
-        params: { name: editFormData.value.projectName },
-      });
-      if (response.data) {
-        projectId = response.data.id;
-      } else {
-        const createResponse = await API.post(`projects`, {
-          project: {
-            name: editFormData.value.projectName,
-          },
-        });
-        projectId = createResponse.data.id;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-
-    updates.project_id = projectId;
-  } else {
-    updates.project_id = null;
-  }
-
-  try {
-    await API.patch(`sessions/${editingSessionId.value}`, {
-      session: updates,
-    });
-
-    cancelEditing();
-    await fetchSessions(true);
-  } catch (error) {
-    console.log(error);
-  }
-}
-
-async function deleteSession() {
-  try {
-    await API.delete(`sessions/${editingSessionId.value}`);
-  } catch (error) {
-    console.log(error);
-  }
-
-  allSessions.value = allSessions.value.filter(
-    (s) => s.id !== editingSessionId.value,
-  );
-
-  cancelEditing();
-  await showProjectTime();
+function openEditModal(session) {
+  selectedSession.value = session;
+  isEditModalOpen.value = true;
 }
 
 async function showProjectTime() {
@@ -323,28 +247,11 @@ function formatDate(dateString) {
 }
 
 function getDisplayDate(session) {
-  if (editingSessionId.value === session.id && editFormData.value.date) {
-    return editFormData.value.date;
-  }
   return session.start_time;
 }
 
-async function createNewSession() {
-  try {
-    const session = await API.post("sessions", {
-      session: {
-        duration: undefined,
-        description: undefined,
-        project_id: undefined,
-        start_time: new Date().toISOString(),
-      },
-    });
-
-    editingSessionId.value = session.data.id;
-    await fetchSessions(true);
-  } catch (error) {
-    console.log(error);
-  }
+function createNewSession() {
+  addingSession.value = true;
 }
 
 function refreshDataAfterProjectChange() {
@@ -355,117 +262,72 @@ function refreshDataAfterProjectChange() {
 </script>
 
 <template>
-  <div class="mainContainer">
+  <div class="main-container">
     <TTIconButton
       @click="$router.push('/')"
-      id="backButton"
+      class="home-button"
       icon="pi pi-clock"
     />
-    <div class="timeWindows">
-      <SelectButton
+    <div class="time-windows">
+      <TTSelectButton
         :modelValue="timeWindowSelection"
         @update:modelValue="handleSelectButtonUpdate"
         :key="selectButtonKey"
         :options="['D', 'W', 'M', 'Y', 'ALL']"
-      ></SelectButton>
+      ></TTSelectButton>
     </div>
-    <div v-if="timeWindowSelection !== 'ALL'" class="dateNavigationContainer">
-      <div @click="navigateDate(-1)" class="navArrow">
+    <div v-if="timeWindowSelection !== 'ALL'" class="date-navigation-container">
+      <div @click="navigateDate(-1)" class="nav-arrow">
         <i class="pi pi-chevron-left"></i>
       </div>
 
-      <span class="dateNavigationText">{{ dateDisplayString }}</span>
+      <span class="date-navigation-text">{{ dateDisplayString }}</span>
 
-      <div @click="navigateDate(1)" class="navArrow">
+      <div @click="navigateDate(1)" class="nav-arrow">
         <i class="pi pi-chevron-right"></i>
       </div>
     </div>
-    <div class="timeContainer">
-      <p class="timeDisplayText">{{ timeDisplay }}</p>
+    <div class="time-container">
+      <p class="time-display-text">{{ timeDisplay }}</p>
     </div>
     <TTIconButton
       @click="selectingProject = true"
-      class="projectSelectionContainer"
+      class="project-selection-container"
       icon="pi pi-briefcase"
       >{{ projectSelection }}</TTIconButton
     >
 
-    <ul class="sessionListContainer">
-      <li v-for="session in allSessions" :key="session.id" class="sessionItem">
-        <div class="leftContainer">
-          <div class="dateBox">
-            <div class="dateMonth">
+    <ul class="session-list-container">
+      <li
+        v-for="session in allSessions"
+        :key="session.id"
+        class="session-item"
+        @click="openEditModal(session)"
+      >
+        <div class="left-container">
+          <div class="date-box">
+            <div class="date-month">
               {{ formatDate(getDisplayDate(session)).month }}
             </div>
-            <div class="dateDay">
+            <div class="date-day">
               {{ formatDate(getDisplayDate(session)).day }}
             </div>
           </div>
-          <DatePicker
-            v-if="editingSessionId === session.id"
-            v-model="editFormData.date"
-            showIcon
-            dateFormat="dd/mm/yy"
-          ></DatePicker>
         </div>
 
-        <div class="sessionInformationContainer">
-          <div
-            v-if="editingSessionId !== session.id"
-            class="sessionDescription"
-          >
+        <div class="session-information-container">
+          <div class="session-description">
             {{ session.description || "working hard" }}
           </div>
-          <div v-else class="sessionDescription">
-            <p class="labels">Description</p>
-            <InputText v-model="editFormData.description" class="editInput" />
-          </div>
 
-          <div v-if="editingSessionId !== session.id" class="projectName">
+          <div class="project-name">
             {{
               getProjectNameFromCache(session.project_id) || "important stuff"
             }}
           </div>
-          <div v-else class="projectName">
-            <p class="labels">Project name</p>
-            <InputText v-model="editFormData.projectName" class="editInput" />
-          </div>
 
-          <div v-if="editingSessionId !== session.id" class="sessionDuration">
+          <div class="session-duration">
             {{ formatDuration(session.duration) }}
-          </div>
-          <div v-else class="sessionDuration">
-            <p class="labels">Duration</p>
-            <InputNumber
-              v-model="editFormData.duration"
-              class="editInput"
-              suffix=" min"
-              :min="0"
-            />
-          </div>
-        </div>
-
-        <div>
-          <div
-            v-if="editingSessionId !== session.id"
-            @click="startEditing(session)"
-            class="actionIcons"
-          >
-            <i class="pi pi-pencil"></i>
-          </div>
-
-          <div class="actionColumn">
-            <div v-if="editingSessionId === session.id" class="actionIcons">
-              <i class="pi pi-check" @click="saveSession()"></i>
-              <i class="pi pi-times" @click="cancelEditing()"></i>
-            </div>
-
-            <div v-if="editingSessionId === session.id" class="actionIcons">
-              <i
-                class="pi pi-trash actionIcon deleteIcon"
-                @click="deleteSession(session.id)"
-              ></i>
-            </div>
           </div>
         </div>
       </li>
@@ -482,241 +344,194 @@ function refreshDataAfterProjectChange() {
   <TTIconButton
     @click="createNewSession()"
     icon="pi pi-plus"
-    class="addSessionButton"
+    class="add-session-button"
   />
 
-  <selectProjectModal
+  <SelectProjectModal
     v-if="selectingProject"
+    v-model="selectingProject"
     :initialSelection="projectSelection"
-    @closeModal="selectingProject = false"
     @selectProject="handleProjectSelect"
     @projectsChanged="refreshDataAfterProjectChange"
+  />
+
+  <AddSessionModal
+    v-model="addingSession"
+    @sessionAdded="fetchSessions(true)"
+  />
+
+  <EditSessionModal
+    v-model="isEditModalOpen"
+    :session="selectedSession"
+    @sessionUpdated="fetchSessions(true)"
+    @sessionDeleted="fetchSessions(true)"
   />
 </template>
 
 <style scoped>
-#backButton {
-  position: fixed;
-  left: 30px;
-  top: 30px;
-}
-
-.mainContainer {
+.main-container {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   margin-top: 100px;
+
+  .home-button {
+    position: fixed;
+    left: 2rem;
+    top: 2rem;
+  }
+
+  .time-windows :deep(.p-togglebutton) {
+    width: 66px;
+  }
+
+  .date-navigation-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 10px;
+    width: 310px;
+
+    .date-navigation-text {
+      color: #2c3e50;
+      font-family: "Chakra Petch", sans-serif;
+      font-size: 20px;
+      min-width: 150px;
+      text-align: center;
+    }
+
+    .nav-arrow {
+      color: #2c3e50;
+    }
+  }
+
+  .time-container {
+    background-color: #344c61;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 330px;
+    height: 120px;
+    border-radius: 15px;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.2);
+
+    .time-display-text {
+      color: lightgrey;
+      font-size: xx-large;
+      font-family: "Chakra Petch", sans-serif;
+      font-weight: 400;
+      font-style: normal;
+    }
+  }
+
+  .project-selection-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    gap: 10px;
+    background-color: #2c3e50;
+    border-radius: 10px;
+    padding: 0 15px;
+    color: lightgrey;
+  }
+
+  .session-list-container {
+    list-style: none;
+    padding: 0;
+    width: 330px;
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    .session-item {
+      background-color: lightblue;
+      border: 2px solid #2c3e50;
+      border-radius: 10px;
+      padding: 10px 10px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      color: #2c3e50;
+      font-family: "Chakra Petch", sans-serif;
+      cursor: pointer;
+
+      .left-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 65px;
+        gap: 7px;
+
+        .date-box {
+          background-color: #344c61;
+          padding-top: 3px;
+          color: lightgrey;
+          border-radius: 7px;
+          width: 65px;
+          height: 65px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+
+          .date-month {
+            font-size: small;
+          }
+
+          .date-day {
+            font-size: x-large;
+          }
+        }
+      }
+
+      .session-information-container {
+        display: flex;
+        justify-content: center;
+        flex-direction: column;
+        flex-grow: 1;
+        min-width: 0;
+        align-items: flex-start;
+        text-align: left;
+        padding-right: 10px;
+
+        .session-description {
+          font-size: medium;
+          font-weight: 600;
+          color: #2c3e50;
+          width: 100%;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          margin-bottom: 2px;
+        }
+
+        .project-name {
+          font-size: 13px;
+          color: #344c61;
+          width: 100%;
+          margin-bottom: 5px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+
+        .session-duration {
+          font-size: medium;
+          color: #2c3e50;
+          width: 100%;
+        }
+      }
+    }
+  }
 }
 
-.timeContainer {
-  background-color: #344c61;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  width: 330px;
-  height: 120px;
-  border-radius: 15px;
-  margin-bottom: 10px;
-  margin-top: 10px;
-}
-
-.timeWindows :deep(.p-togglebutton) {
-  width: 66px;
-}
-
-.timeDisplayText {
-  color: lightgrey;
-  font-size: xx-large;
-  font-family: "Chakra Petch", sans-serif;
-  font-weight: 400;
-  font-style: normal;
-}
-
-.projectSelectionContainer {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  gap: 10px;
-  background-color: #2c3e50;
-  border-radius: 10px;
-  padding: 0 15px;
-  color: lightgrey;
-}
-
-.sessionListContainer {
-  list-style: none;
-  padding: 0;
-  width: 330px;
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.sessionItem {
-  background-color: lightblue;
-  border: 2px solid #2c3e50;
-  border-radius: 10px;
-  padding: 10px 10px;
-  display: flex;
-  justify-content: center;
-  gap: 15px;
-  color: #2c3e50;
-  font-family: "Chakra Petch", sans-serif;
-}
-
-.sessionDescription {
-  font-size: medium;
-  font-weight: 600;
-  color: #2c3e50;
-  width: 100%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 2px;
-}
-.sessionDuration {
-  font-size: medium;
-  color: #2c3e50;
-  width: 100%;
-}
-
-.dateBox {
-  background-color: #344c61;
-  padding-top: 3px;
-  color: lightgrey;
-  border-radius: 7px;
-  width: 65px;
-  height: 65px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-}
-
-.sessionInformationContainer {
-  display: flex;
-  justify-content: center;
-  flex-direction: column;
-  flex-grow: 1;
-  min-width: 0;
-  align-items: flex-start;
-  text-align: left;
-  padding-right: 10px;
-}
-
-.projectName {
-  font-size: 13px;
-  color: #344c61;
-  width: 100%;
-  margin-bottom: 5px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.actionColumn {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px 0;
-  height: 100%;
-}
-
-.actionIcons {
-  cursor: pointer;
-}
-
-.dateMonth {
-  font-size: small;
-}
-
-.dateDay {
-  font-size: x-large;
-}
-
-.editInput {
-  width: 100%;
-  box-sizing: border-box;
-  background-color: lightblue;
-  color: #2c3e50;
-  border: 1px solid #344c61 !important;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  height: 30px;
-  font-family: inherit;
-  font-size: 14px;
-  margin-bottom: 5px;
-}
-
-.editInput.p-inputnumber {
-  padding: 0;
-  border: 1px solid #344c61 !important;
-}
-
-.editInput :deep(.p-inputtext) {
-  background-color: transparent !important;
-  box-shadow: none !important;
-  color: #2c3e50 !important;
-  width: 100%;
-  height: 100%;
-  padding: 0 8px;
-  font-family: inherit;
-  font-size: 14px;
-}
-
-.editInput:focus-within {
-  border: 1px solid #2c3e50 !important;
-}
-
-.editInput :deep(.p-inputtext:focus) {
-  outline: none !important;
-}
-
-.labels {
-  margin: 0 0 4px 0;
-  font-size: 15px;
-  font-weight: bold;
-  color: #2c3e50;
-  text-align: left;
-  display: block;
-  width: 100%;
-}
-
-.leftContainer {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 65px;
-  gap: 7px;
-}
-
-.addSessionButton {
+.add-session-button {
   position: fixed;
   right: 30px;
   bottom: 30px;
-}
-
-.dateNavigationContainer {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-  width: 310px;
-}
-
-.dateNavigationText {
-  color: #2c3e50;
-  font-family: "Chakra Petch", sans-serif;
-  font-size: 20px;
-  min-width: 150px;
-  text-align: center;
-}
-
-.navArrow {
-  color: #2c3e50;
 }
 </style>

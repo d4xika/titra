@@ -5,7 +5,7 @@ const props = defineProps({
   },
   variant: {
     type: String,
-    default: "default",
+    default: "dark-version",
   },
 });
 </script>
@@ -36,13 +36,19 @@ const props = defineProps({
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-.variant-lightVersion {
+.variant-light-version {
   background-color: var(--secondary-color);
   color: var(--primary-color);
 }
 
-.variant-default {
-  background-color: #2c3e50;
-  color: lightgrey;
+.variant-dark-version {
+  background-color: var(--primary-color);
+  color: var(--white);
+}
+
+.variant-dark-border-version {
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: 1px solid var(--secondary-color);
 }
 </style>

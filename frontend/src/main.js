@@ -9,7 +9,6 @@ import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
 import DatePicker from "primevue/datepicker";
 import "primeicons/primeicons.css";
-import "./primevue.css";
 import "./core.scss";
 import router from "@/router/router.js";
 

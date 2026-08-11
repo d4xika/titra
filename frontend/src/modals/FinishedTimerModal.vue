@@ -33,33 +33,24 @@ const filteredProjects = computed(() => {
 async function updateProjectInfo() {
   const projectNameString = projectName.value;
 
-  if (!projectNameString) {
-    await API.patch(`sessions/${props.id}`, {
-      session: {
-        project_id: null,
-        description: description.value,
-      },
-    });
-
-    return;
-  }
-
   let projectId = null;
 
-  try {
-    const response = await API.get(`projects`, {
-      params: { name: projectNameString },
-    });
-    if (response.data && response.data.id) {
-      projectId = response.data.id;
-    } else {
-      const createResponse = await API.post("projects", {
-        project: { name: projectNameString },
+  if (projectNameString) {
+    try {
+      const response = await API.get(`projects`, {
+        params: { name: projectNameString },
       });
-      projectId = createResponse.data.id;
+      if (response.data && response.data.id) {
+        projectId = response.data.id;
+      } else {
+        const createResponse = await API.post("projects", {
+          project: { name: projectNameString },
+        });
+        projectId = createResponse.data.id;
+      }
+    } catch (error) {
+      console.log(error);
     }
-  } catch (error) {
-    console.log(error);
   }
 
   await API.patch(`sessions/${props.id}`, {
@@ -68,17 +59,21 @@ async function updateProjectInfo() {
       description: description.value,
     },
   });
+
+  projectName.value = "";
+  description.value = "";
 }
 </script>
 
 <template>
-  <TTDrawer title="Great job! So proud of you!" v-model="model">
+  <TTDrawer
+    title="Great job!"
+    v-model="model"
+    kitty="/img/kitties/happyKitty.gif"
+    altKitty="happy kitty"
+    position="height: 150px; margin-top: -100px"
+  >
     <template #body class="finished-timer-modal">
-      <img
-        style="height: 150px; margin-top: -100px"
-        src="/img/kitties/happyKitty.gif"
-        alt="happy kitty"
-      />
       <div class="questions-container">
         <TTAutoComplete
           class="autocompleteField"
@@ -91,10 +86,12 @@ async function updateProjectInfo() {
         <TTTextInput label="Description" v-model="description" />
         <TTTextButton
           @click="
-            updateProjectInfo();
-            emit('closeModal');
+            async () => {
+              await updateProjectInfo();
+              emit('closeModal');
+            }
           "
-          variant="lightVersion"
+          variant="light-version"
           text="Save"
         ></TTTextButton>
       </div>
@@ -110,5 +107,6 @@ async function updateProjectInfo() {
   width: 100%;
   padding: 0 var(--gap-1);
   gap: var(--gap-3);
+  margin-top: var(--gap-2);
 }
 </style>

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import finishedTimerModal from "@/modals/finishedTimerModal.vue";
-import resetTimerModal from "@/modals/resetTimerModal.vue";
+import FinishedTimerModal from "@/modals/FinishedTimerModal.vue";
+import ResetTimerModal from "@/modals/ResetTimerModal.vue";
 import API from "@/helper/api.js";
 
 const timerSelection = ref("pi pi-stopwatch");
@@ -72,6 +72,10 @@ function resetTimer() {
 }
 
 async function stopTimer() {
+  if (timer.value.running) {
+    pauseTimer();
+  }
+
   try {
     const startTime = timer.value.startTime
       ? new Date(timer.value.startTime)
@@ -207,16 +211,15 @@ function handleSelectButtonUpdate(nextVal) {
     </div>
   </div>
 
-  <finishedTimerModal
+  <FinishedTimerModal
     :id="sessionId"
     v-model="timer.finished"
     @closeModal="timer.finished = false"
   />
-  <resetTimerModal
-    v-if="timer.reset"
-    @yesReset="resetTimer"
+  <ResetTimerModal
+    v-model="timer.reset"
+    @reset="resetTimer"
     @closeModal="timer.reset = false"
-    @noReset="timer.reset = false"
   />
 </template>
 

@@ -131,7 +131,7 @@ async function login() {
         <TTTextInput label="Username" v-model="username" />
         <TTTextInput label="Password" v-model="password" type="password" />
         <div class="submit-button-container">
-          <TTTextButton @click="login()" text="Submit" variant="lightVersion" />
+          <TTTextButton @click="login()" text="Submit" variant="light-version" />
         </div>
       </div>
     </template>
@@ -152,7 +152,7 @@ async function login() {
           <TTTextButton
             @click="register()"
             text="Register"
-            variant="lightVersion"
+            variant="light-version"
           />
         </div>
       </div>
