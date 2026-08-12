@@ -125,19 +125,23 @@ async function login() {
 
   X {{ activityId }} X-->
 
-  <TTDrawer title="Login" v-model="showLoginModal">
+  <TTDrawer title="Login" v-model="showLoginModal" show-divider>
     <template #body>
       <div class="auth-modal">
         <TTTextInput label="Username" v-model="username" />
         <TTTextInput label="Password" v-model="password" type="password" />
         <div class="submit-button-container">
-          <TTTextButton @click="login()" text="Submit" variant="light-version" />
+          <TTTextButton
+            @click="login()"
+            text="Submit"
+            variant="light-version"
+          />
         </div>
       </div>
     </template>
   </TTDrawer>
 
-  <TTDrawer title="Register" v-model="showRegisterModal">
+  <TTDrawer title="Register" v-model="showRegisterModal" show-divider>
     <template #body>
       <div class="auth-modal">
         <TTTextInput label="Username" v-model="username" />
@@ -186,6 +190,7 @@ async function login() {
 .auth-modal {
   display: flex;
   flex-direction: column;
+  padding: var(--gap-2) 0;
   gap: calc(var(--gap-2) + var(--gap-1));
 
   .submit-button-container {

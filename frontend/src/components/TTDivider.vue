@@ -7,8 +7,8 @@
 <style scoped>
 .divider {
   width: 130%;
-  margin-left: 50%;
+  margin-left: -5%;
   height: 1px;
-  background-color: color-mix(var(--white), 70% transparent);
+  background-color: var(--white-transparent);
 }
 </style>

@@ -139,7 +139,7 @@ function close() {
     v-model="model"
     kitty="/img/kitties/workingKitty.gif"
     altKitty="working kitty"
-    position="height: 150px; margin-top: -100px"
+    position="height: 150px; margin-top: -100px; padding: 0 5px"
   >
     <template #body>
       <div class="edit-session-container">

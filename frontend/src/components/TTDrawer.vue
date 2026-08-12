@@ -18,6 +18,10 @@ const props = defineProps({
     type: String,
     default: undefined,
   },
+  showDivider: {
+    type: Boolean,
+    default: false,
+  },
 });
 const model = defineModel({ type: Boolean, default: false });
 </script>
@@ -26,9 +30,13 @@ const model = defineModel({ type: Boolean, default: false });
   <Drawer
     v-model:visible="model"
     position="bottom"
-    :header="!$slots.header ? props.title : undefined"
+    :header="
+      !$slots.header && !props.kitty && !props.showDivider
+        ? props.title
+        : undefined
+    "
   >
-    <template #header v-if="$slots.header || props.kitty">
+    <template #header v-if="$slots.header || props.kitty || props.showDivider">
       <div class="title-container">
         <span class="p-drawer-title">{{ props.title }}</span>
         <TTDivider />
@@ -59,17 +67,13 @@ const model = defineModel({ type: Boolean, default: false });
   background-color: var(--primary-color) !important;
   color: var(--white) !important;
 
-  .p-button {
-    border: none !important;
-    margin-right: 2% !important;
-  }
-
   .title-container {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: start;
     width: 100%;
     gap: var(--gap-2);
+    padding-left: var(--gap-3);
   }
 
   .header-container {
@@ -82,5 +86,24 @@ const model = defineModel({ type: Boolean, default: false });
   .kitty-image {
     z-index: 100;
   }
+}
+
+.p-drawer .p-drawer-close-button {
+  min-width: 2rem;
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.p-drawer .p-drawer-close-button:hover,
+.p-drawer .p-drawer-close-button:active,
+.p-drawer .p-drawer-close-button:focus,
+.p-drawer .p-drawer-close-button:focus-visible {
+  border: 0 !important;
+  outline: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
 </style>
