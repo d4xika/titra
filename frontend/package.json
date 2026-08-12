@@ -14,7 +14,6 @@
     "@capacitor/ios": "^7.1.0",
     "@primeuix/themes": "^1.2.5",
     "@primevue/auto-import-resolver": "^5.0.0",
-    "@supabase/supabase-js": "^2.57.0",
     "axios": "^1.18.1",
     "live-activities": "file:live-activities",
     "prettier": "^3.8.3",
@@ -27,7 +26,7 @@
   },
   "devDependencies": {
     "@capacitor/cli": "^7.1.0",
-    "@vitejs/plugin-vue": "^5.0.0",
+    "@vitejs/plugin-vue": "^6.0.8",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "sass-embedded": "^1.100.0",
