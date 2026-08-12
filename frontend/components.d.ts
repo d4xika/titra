@@ -20,6 +20,7 @@ declare module 'vue' {
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
     SelectButton: typeof import('primevue/selectbutton')['default']
+    Skeleton: typeof import('primevue/skeleton')['default']
     TTAutoComplete: typeof import('./src/components/TTAutoComplete.vue')['default']
     TTDatePicker: typeof import('./src/components/TTDatePicker.vue')['default']
     TTDivider: typeof import('./src/components/TTDivider.vue')['default']

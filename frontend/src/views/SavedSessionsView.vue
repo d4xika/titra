@@ -16,6 +16,7 @@ const sessionsPerPage = ref(10);
 const currentPage = ref(0);
 const canLoadMore = ref(true);
 const isLoadingSessions = ref(true);
+const isLoadingSummary = ref(true);
 const projectNamesCache = ref({});
 const isEditModalOpen = ref(false);
 const selectedSession = ref(null);
@@ -106,6 +107,8 @@ function openEditModal(session) {
 }
 
 async function showProjectTime() {
+  isLoadingSummary.value = true;
+
   try {
     let projectId = null;
     if (projectSelection.value !== "all projects") {
@@ -138,6 +141,8 @@ async function showProjectTime() {
   } catch (error) {
     console.log(error);
     timeDisplay.value = formatDuration(0);
+  } finally {
+    isLoadingSummary.value = false;
   }
 }
 
@@ -182,9 +187,14 @@ async function fetchSessions(reset = false) {
     }
 
     const response = await API.get(`sessions?${queryParams.toString()}`);
-    const data = response.data;
+    const data = response.data || [];
 
-    if (data && data.length > 0) {
+    if (data.length > 0) {
+      const uniqueProjectIds = [
+        ...new Set(data.map((s) => s.project_id).filter((id) => id != null)),
+      ];
+      await Promise.all(uniqueProjectIds.map(fetchProjectName));
+
       allSessions.value = [...allSessions.value, ...data];
       currentPage.value++;
 
@@ -194,11 +204,6 @@ async function fetchSessions(reset = false) {
     } else {
       canLoadMore.value = false;
     }
-
-    const uniqueProjectIds = [
-      ...new Set(data.map((s) => s.project_id).filter((id) => id != null)),
-    ];
-    uniqueProjectIds.forEach((id) => fetchProjectName(id));
   } catch (error) {
     console.log(error);
     canLoadMore.value = false;
@@ -212,9 +217,7 @@ function getProjectNameFromCache(projectId) {
 }
 
 async function fetchProjectName(projectId) {
-  if (projectNamesCache.value[projectId]) {
-    return;
-  }
+  if (projectNamesCache.value[projectId]) return;
 
   try {
     const response = await API.get(`projects/${encodeURIComponent(projectId)}`);
@@ -287,8 +290,14 @@ function refreshDataAfterProjectChange() {
         <i class="pi pi-chevron-right"></i>
       </div>
     </div>
-    <div class="time-container">
-      <p class="time-display-text">{{ timeDisplay }}</p>
+    <div class="time-container" :aria-busy="isLoadingSummary">
+      <Skeleton
+        v-if="isLoadingSummary"
+        width="11rem"
+        height="2.75rem"
+        borderRadius="var(--border-radius-1)"
+      />
+      <p v-else class="time-display-text">{{ timeDisplay }}</p>
     </div>
     <TTIconButton
       @click="selectingProject = true"
@@ -297,7 +306,7 @@ function refreshDataAfterProjectChange() {
       >{{ projectSelection }}</TTIconButton
     >
 
-    <ul class="session-list-container">
+    <ul class="session-list-container" :aria-busy="isLoadingSessions">
       <li
         v-for="session in allSessions"
         :key="session.id"
@@ -331,6 +340,20 @@ function refreshDataAfterProjectChange() {
           </div>
         </div>
       </li>
+      <template v-if="isLoadingSessions && allSessions.length === 0">
+        <li
+          v-for="placeholder in 4"
+          :key="`session-skeleton-${placeholder}`"
+          class="session-item-skeleton"
+          aria-hidden="true"
+        >
+          <Skeleton
+            width="100%"
+            height="5.5rem"
+            borderRadius="var(--border-radius-2)"
+          />
+        </li>
+      </template>
     </ul>
 
     <TTTextButton
@@ -357,14 +380,23 @@ function refreshDataAfterProjectChange() {
 
   <AddSessionModal
     v-model="addingSession"
-    @sessionAdded="fetchSessions(true); showProjectTime()"
+    @sessionAdded="
+      fetchSessions(true);
+      showProjectTime();
+    "
   />
 
   <EditSessionModal
     v-model="isEditModalOpen"
     :session="selectedSession"
-    @sessionUpdated="fetchSessions(true); showProjectTime()"
-    @sessionDeleted="fetchSessions(true); showProjectTime()"
+    @sessionUpdated="
+      fetchSessions(true);
+      showProjectTime();
+    "
+    @sessionDeleted="
+      fetchSessions(true);
+      showProjectTime();
+    "
   />
 </template>
 
@@ -444,6 +476,10 @@ function refreshDataAfterProjectChange() {
     display: flex;
     flex-direction: column;
     gap: var(--gap-2);
+
+    .session-item-skeleton :deep(.p-skeleton) {
+      background: var(--primary-color-transparent);
+    }
 
     .session-item {
       background-color: var(--secondary-color);

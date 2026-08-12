@@ -16,13 +16,18 @@ const tempSelectedProject = ref(props.initialSelection);
 const editingProjectId = ref(null);
 const editProjectName = ref("");
 const deletingProjectId = ref(null);
+const isLoadingProjects = ref(true);
 
 async function fetchProjects() {
+  isLoadingProjects.value = true;
+
   try {
     const response = await API.get("projects");
     projects.value = response.data;
   } catch (error) {
     console.log(error);
+  } finally {
+    isLoadingProjects.value = false;
   }
 }
 
@@ -112,7 +117,7 @@ onMounted(() => {
   >
     <template #body>
       <div class="select-project-container">
-        <ul class="project-list">
+        <ul class="project-list" :aria-busy="isLoadingProjects">
           <li
             @click="tempSelectedProject = 'all projects'"
             :class="{ selected: tempSelectedProject === 'all projects' }"
@@ -120,7 +125,26 @@ onMounted(() => {
           >
             all projects
           </li>
-          <li v-for="project in projects" :key="project.id" class="project-li">
+          <template v-if="isLoadingProjects">
+            <li
+              v-for="placeholder in 4"
+              :key="`project-skeleton-${placeholder}`"
+              class="project-skeleton"
+              aria-hidden="true"
+            >
+              <Skeleton
+                width="100%"
+                height="2.5rem"
+                borderRadius="var(--border-radius-1)"
+              />
+            </li>
+          </template>
+          <li
+            v-else
+            v-for="project in projects"
+            :key="project.id"
+            class="project-li"
+          >
             <div v-if="editingProjectId === project.id" class="edit-container">
               <input v-model="editProjectName" class="edit-input" />
               <div class="edit-icons">
