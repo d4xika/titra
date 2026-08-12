@@ -337,7 +337,7 @@ function refreshDataAfterProjectChange() {
       v-if="canLoadMore && !isLoadingSessions"
       @click="fetchSessions(false)"
       text="Load More"
-      style="margin-bottom: 25px"
+      style="margin-bottom: var(--gap-4)"
     />
   </div>
 
@@ -374,7 +374,7 @@ function refreshDataAfterProjectChange() {
   justify-content: center;
   align-items: center;
   flex-direction: column;
-  margin-top: 100px;
+  margin-top: 6.25rem;
 
   .home-button {
     position: fixed;
@@ -383,7 +383,7 @@ function refreshDataAfterProjectChange() {
   }
 
   .time-windows :deep(.p-togglebutton) {
-    width: 66px;
+    width: 4.125rem;
   }
 
   .date-navigation-container {
@@ -391,40 +391,37 @@ function refreshDataAfterProjectChange() {
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
-    margin-top: 10px;
-    width: 310px;
+    margin-top: var(--gap-2);
+    width: 19.375rem;
 
     .date-navigation-text {
-      color: #2c3e50;
+      color: var(--primary-color);
       font-family: "Chakra Petch", sans-serif;
-      font-size: 20px;
-      min-width: 150px;
+      font-size: var(--font-size-1-5);
+      min-width: 9.375rem;
       text-align: center;
     }
 
     .nav-arrow {
-      color: #2c3e50;
+      color: var(--primary-color);
     }
   }
 
   .time-container {
-    background-color: #344c61;
+    background-color: var(--primary-color);
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 330px;
-    height: 120px;
-    border-radius: 15px;
-    margin-bottom: 10px;
-    margin-top: 10px;
-    box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.2);
+    width: 20.6rem;
+    height: 7.5rem;
+    border-radius: var(--border-radius-2);
+    margin-bottom: var(--gap-2);
+    margin-top: var(--gap-2);
+    box-shadow: var(--gap-2) var(--gap-2) var(--gap-3) rgba(0, 0, 0, 0.2);
 
     .time-display-text {
-      color: lightgrey;
-      font-size: xx-large;
-      font-family: "Chakra Petch", sans-serif;
-      font-weight: 400;
-      font-style: normal;
+      color: var(--white);
+      font-size: var(--font-size-3);
     }
   }
 
@@ -432,58 +429,57 @@ function refreshDataAfterProjectChange() {
     display: flex;
     flex-direction: row;
     justify-content: center;
-    gap: 10px;
-    background-color: #2c3e50;
-    border-radius: 10px;
-    padding: 0 15px;
-    color: lightgrey;
+    gap: var(--gap-2);
+    background-color: var(--primary-color);
+    border-radius: var(--border-radius-2);
+    padding: 0 var(--gap-3);
+    color: var(--white);
   }
 
   .session-list-container {
     list-style: none;
     padding: 0;
-    width: 330px;
-    margin-top: 20px;
+    width: 20.6rem;
+    margin-top: var(--gap-3);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--gap-2);
 
     .session-item {
-      background-color: lightblue;
-      border: 2px solid #2c3e50;
-      border-radius: 10px;
-      padding: 10px 10px;
+      background-color: var(--secondary-color);
+      border: 2px solid var(--primary-color);
+      border-radius: var(--border-radius-2);
+      padding: var(--gap-2);
       display: flex;
       justify-content: center;
-      gap: 15px;
-      color: #2c3e50;
-      font-family: "Chakra Petch", sans-serif;
+      gap: var(--gap-3);
+      color: var(--primary-color);
       cursor: pointer;
 
       .left-container {
         display: flex;
         flex-direction: column;
         align-items: center;
-        width: 65px;
-        gap: 7px;
+        width: 4rem;
+        gap: var(--gap-2);
 
         .date-box {
-          background-color: #344c61;
-          padding-top: 3px;
-          color: lightgrey;
-          border-radius: 7px;
-          width: 65px;
-          height: 65px;
+          background-color: var(--primary-color);
+          padding-top: var(--gap-1);
+          color: var(--white);
+          border-radius: var(--border-radius-1);
+          width: 4rem;
+          height: 4rem;
           display: flex;
           flex-direction: column;
           justify-content: center;
 
           .date-month {
-            font-size: small;
+            font-size: var(--font-size-1);
           }
 
           .date-day {
-            font-size: x-large;
+            font-size: var(--font-size-2);
           }
         }
       }
@@ -496,32 +492,32 @@ function refreshDataAfterProjectChange() {
         min-width: 0;
         align-items: flex-start;
         text-align: left;
-        padding-right: 10px;
+        padding-right: var(--gap-2);
 
         .session-description {
-          font-size: medium;
+          font-size: var(--font-size-1-5);
           font-weight: 600;
-          color: #2c3e50;
+          color: var(--primary-color);
           width: 100%;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
-          margin-bottom: 2px;
+          margin-bottom: var(--gap-1);
         }
 
         .project-name {
-          font-size: 13px;
-          color: #344c61;
+          font-size: var(--font-size-1);
+          color: var(--primary-color);
           width: 100%;
-          margin-bottom: 5px;
+          margin-bottom: var(--gap-1);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
         }
 
         .session-duration {
-          font-size: medium;
-          color: #2c3e50;
+          font-size: var(--font-size-1-5);
+          color: var(--primary-color);
           width: 100%;
         }
       }
@@ -531,7 +527,7 @@ function refreshDataAfterProjectChange() {
 
 .add-session-button {
   position: fixed;
-  right: 30px;
-  bottom: 30px;
+  right: var(--gap-4);
+  bottom: var(--gap-4);
 }
 </style>

@@ -29,7 +29,7 @@ const props = defineProps({
   align-items: center;
   color: var(--white);
   cursor: pointer;
-  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+  box-shadow: var(--gap-1) var(--gap-1) var(--gap-3) rgba(0, 0, 0, 0.2);
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
@@ -44,7 +44,7 @@ const props = defineProps({
 
   &:hover {
     transform: scale(1.05);
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 var(--gap-2) var(--gap-3) rgba(0, 0, 0, 0.2);
   }
 }
 </style>

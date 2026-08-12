@@ -175,13 +175,13 @@ function handleSelectButtonUpdate(nextVal) {
       <div>
         <img
           v-if="timer.running"
-          style="height: 200px; margin-bottom: 5px"
+          style="height: 12.5rem; margin-bottom: var(--gap-1)"
           src="/img/kitties/workingKitty.gif"
           alt="working kitty"
         />
         <img
           v-else
-          style="height: 160px; margin-top: 45px"
+          style="height: 10rem; margin-top: 3rem"
           src="/img/kitties/sleepingKitty.gif"
           alt="sleeping kitty"
         />
@@ -253,7 +253,7 @@ function handleSelectButtonUpdate(nextVal) {
       height: 9rem;
       border-radius: var(--border-radius-3);
       font-size: var(--font-size-4);
-      box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.2);
+      box-shadow: var(--gap-2) var(--gap-2) var(--gap-3) rgba(0, 0, 0, 0.2);
     }
 
     .input-box {

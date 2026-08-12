@@ -18,13 +18,13 @@ const props = defineProps({
 
 <style scoped>
 .buttonContainer {
-  height: 40px;
+  height: 2.5rem;
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 10px;
+  border-radius: var(--border-radius-2);
   width: fit-content;
-  padding: 0 20px 0 20px;
+  padding: 0 var(--gap-3);
   cursor: pointer;
   transition:
     transform 0.3s ease,
@@ -33,7 +33,7 @@ const props = defineProps({
 
 .buttonContainer:hover {
   transform: scale(1.05);
-  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 var(--gap-2) var(--gap-3) rgba(0, 0, 0, 0.2);
 }
 
 .variant-light-version {

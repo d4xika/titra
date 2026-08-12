@@ -108,7 +108,7 @@ onMounted(() => {
     v-model="model"
     kitty="/img/kitties/workingKitty.gif"
     altKitty="working kitty"
-    position="height: 150px; margin-top: -100px; padding: 0 5px"
+    position="height: 9.5rem; margin-top: -6.25rem; padding: 0 var(--gap-1)"
   >
     <template #body>
       <div class="select-project-container">
@@ -186,34 +186,34 @@ onMounted(() => {
   .project-list {
     list-style: none;
     padding: 0;
-    width: min(100%, 330px);
+    width: min(100%, 20.6rem);
     max-height: 40vh;
     margin: 0;
     overflow-y: auto;
 
     li {
       width: 100%;
-      min-height: 38px;
+      min-height: 2rem;
       display: flex;
       align-items: center;
-      border-radius: 8px;
-      margin-bottom: 5px;
+      border-radius: var(--border-radius-1);
+      margin-bottom: var(--gap-1);
       transition: background-color 0.2s;
       box-sizing: border-box;
 
       &.all-projects-li {
-        padding: 10px;
+        padding: var(--gap-2);
         cursor: pointer;
         justify-content: center;
-        border-bottom: 2px solid #344c61;
-        margin-bottom: 10px;
+        border-bottom: 2px solid var(--primary-color);
+        margin-bottom: var(--gap-2);
 
         &:hover {
-          background-color: rgba(255, 255, 255, 0.1);
+          background-color: var(--white-transparent);
         }
 
         &.selected {
-          background-color: #344c61;
+          background-color: var(--primary-color);
         }
       }
 
@@ -229,18 +229,18 @@ onMounted(() => {
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      padding: 10px;
-      border-radius: 8px;
+      padding: var(--gap-2);
+      border-radius: var(--border-radius-1);
       box-sizing: border-box;
     }
 
     .project-item {
       &:hover {
-        background-color: rgba(255, 255, 255, 0.1);
+        background-color: var(--white-transparent);
       }
 
       &.selected {
-        background-color: #344c61;
+        background-color: var(--primary-color);
       }
 
       .project-name {
@@ -255,15 +255,15 @@ onMounted(() => {
     .delete-icons {
       i {
         cursor: pointer;
-        padding: 4px;
-        margin-left: 8px;
-        border-radius: 4px;
+        padding: var(--gap-1);
+        margin-left: var(--gap-2);
+        border-radius: var(--border-radius-1);
         flex-shrink: 0;
       }
     }
 
     .action-icons i:hover {
-      color: #fff;
+      color: var(--white);
       background-color: rgba(0, 0, 0, 0.2);
     }
 
@@ -273,18 +273,18 @@ onMounted(() => {
       .edit-input {
         width: 100%;
         flex-grow: 1;
-        background: lightgrey;
-        color: #2c3e50;
+        background: var(--white);
+        color: var(--primary-color);
         border: none;
-        border-radius: 4px;
-        padding: 5px;
+        border-radius: var(--border-radius-1);
+        padding: var(--gap-1);
         font-family: inherit;
-        font-size: 0.95em;
+        font-size: var(--font-size-1-5);
       }
     }
 
     .delete-confirm-container {
-      color: lightgrey;
+      color: var(--white);
 
       .delete-icons i:hover {
         background-color: rgba(0, 0, 0, 0.2);
@@ -293,8 +293,8 @@ onMounted(() => {
   }
 
   .text-button {
-    font-size: medium;
-    padding: 0 10px;
+    font-size: var(--font-size-1-5);
+    padding: 0 var(--gap-2);
   }
 }
 </style>

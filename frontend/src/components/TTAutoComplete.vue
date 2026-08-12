@@ -87,7 +87,7 @@ onBeforeUnmount(() =>
   padding: var(--gap-2) !important;
   color: var(--white) !important;
   outline: none;
-  border-radius: 5px;
+  border-radius: var(--border-radius-1);
   font-size: var(--font-size-1-5) !important;
 
   &:enabled:focus {
@@ -101,25 +101,25 @@ label {
 
 .dropdown {
   position: absolute;
-  top: var(--gap-6);
+  top: 8rem;
   left: 0;
   width: 100%;
-  background-color: lightblue;
-  border-radius: 10px;
-  margin-top: 4px;
-  padding: 8px 0;
+  background-color: var(--secondary-color);
+  border-radius: var(--border-radius-2);
+  margin-top: var(--gap-1);
+  padding: var(--gap-2) 0;
   margin-bottom: 0;
   list-style: none;
-  max-height: 200px;
+  max-height: 12.5rem;
   overflow-y: auto;
   z-index: 1000;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 var(--gap-1) var(--gap-2) rgba(0, 0, 0, 0.2);
   pointer-events: auto;
 }
 
 .option {
-  padding: 10px 16px;
-  color: #2c3e50;
+  padding: var(--gap-2) var(--gap-3);
+  color: var(--primary-color);
   cursor: pointer;
   transition: background-color 0.2s;
 }

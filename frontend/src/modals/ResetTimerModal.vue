@@ -9,7 +9,7 @@ const emit = defineEmits(["closeModal", "reset"]);
     v-model="model"
     kitty="/img/kitties/sadKitty.gif"
     altKitty="sad kitty"
-    position="height: 150px; margin-top: -100px"
+    position="height: 9.5rem; margin-top: -6.25rem"
   >
     <template #body class="finished-timer-modal">
       <p class="confirmation-text">Are you sure you want to reset?</p>

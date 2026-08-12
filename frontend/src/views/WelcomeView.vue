@@ -105,7 +105,7 @@ async function login() {
   <div class="welcome-view">
     <div class="content-container">
       <img
-        style="height: 180px"
+        style="height: 11.25rem"
         src="/img/kitties/happyKitty.gif"
         alt="happy kitty"
       />

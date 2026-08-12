@@ -61,12 +61,12 @@ function updateDate(selectedDate) {
 .p-datepicker-month-selected,
 .p-datepicker-year-selected {
   background-color: var(--primary-color) !important;
-  color: white !important;
+  color: var(--white) !important;
 }
 
 .p-datepicker-select-year,
 .p-datepicker-select-month {
   font-family: "Chakra Petch", sans-serif !important;
-  font-size: medium;
+  font-size: var(--font-size-1-5);
 }
 </style>

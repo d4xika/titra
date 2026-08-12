@@ -71,7 +71,7 @@ async function updateProjectInfo() {
     v-model="model"
     kitty="/img/kitties/happyKitty.gif"
     altKitty="happy kitty"
-    position="height: 150px; margin-top: -100px"
+    position="height: 9.5rem; margin-top: -6.25rem"
   >
     <template #body class="finished-timer-modal">
       <div class="questions-container">
