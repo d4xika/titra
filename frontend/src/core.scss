@@ -1,0 +1,32 @@
+:root {
+  --primary-color: #2c3e50;
+  --primary-color-dark: #011A1F8F;
+  --secondary-color: lightblue;
+  --white: #d5d9e3;
+  --gap-1: 4px;
+  --gap-2: 8px;
+  --gap-3: 16px;
+  --gap-4: 32px;
+  --gap-5: 64px;
+  --font-size-1: 12px;
+  --font-size-1-5: 18px;
+  --font-size-2: 24px;
+  --font-size-3: 36px;
+  --font-size-4: 48px;
+  --border-radius-1: 6px;
+  --border-radius-2: 12px;
+  --border-radius-3: 18px;
+}
+
+body {
+  margin: 0;
+  font-family: "Chakra Petch", sans-serif;
+  font-weight: 400;
+  background-color: lightblue;
+  text-align: center;
+  color: var(--white);
+}
+
+input {
+  font-family: "Chakra Petch", sans-serif;
+}
