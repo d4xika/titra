@@ -7,8 +7,10 @@
   "theme_color": "#2c3e50",
   "icons": [
     {
-      "src": "img/icons/kitty-icon-new.png",
-      "type": "image/png"
+      "src": "img/icons/kitty-icon-new.png?v=20260812",
+      "type": "image/png",
+      "sizes": "1100x1100",
+      "purpose": "any"
     }
   ]
 }

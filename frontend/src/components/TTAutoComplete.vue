@@ -39,27 +39,27 @@ onBeforeUnmount(() =>
 </script>
 
 <template>
-  <FloatLabel variant="on">
-    <InputText
-      v-model="model"
-      @input="isOpen = true"
-      @focus="isOpen = true"
-      class="input"
-    />
-    <div class="autocomplete-wrapper" ref="wrapperRef">
-      <ul v-show="isOpen && props.suggestions.length > 0" class="dropdown">
-        <li
-          v-for="(item, index) in props.suggestions"
-          :key="index"
-          @click="selectOption(item)"
-          class="option"
-        >
-          {{ item[props.optionLabel] }}
-        </li>
-      </ul>
-    </div>
-    <label>{{ props.label }}</label>
-  </FloatLabel>
+  <div class="autocomplete-wrapper" ref="wrapperRef">
+    <FloatLabel variant="on">
+      <InputText
+        v-model="model"
+        @input="isOpen = true"
+        @focus="isOpen = true"
+        class="input"
+      />
+      <label>{{ props.label }}</label>
+    </FloatLabel>
+    <ul v-show="isOpen && props.suggestions.length > 0" class="dropdown">
+      <li
+        v-for="(item, index) in props.suggestions"
+        :key="index"
+        @click="selectOption(item)"
+        class="option"
+      >
+        {{ item[props.optionLabel] }}
+      </li>
+    </ul>
+  </div>
 </template>
 
 <style scoped>
@@ -73,11 +73,8 @@ onBeforeUnmount(() =>
 }
 
 .autocomplete-wrapper {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
   width: 100%;
-  pointer-events: none;
 }
 
 :deep(.p-inputtext) {
@@ -101,20 +98,18 @@ label {
 
 .dropdown {
   position: absolute;
-  top: 8rem;
+  top: calc(100% + var(--gap-1));
   left: 0;
   width: 100%;
   background-color: var(--secondary-color);
   border-radius: var(--border-radius-2);
-  margin-top: var(--gap-1);
+  margin: 0;
   padding: var(--gap-2) 0;
-  margin-bottom: 0;
   list-style: none;
   max-height: 12.5rem;
   overflow-y: auto;
   z-index: 1000;
   box-shadow: 0 var(--gap-1) var(--gap-2) rgba(0, 0, 0, 0.2);
-  pointer-events: auto;
 }
 
 .option {

@@ -26,8 +26,9 @@ export default defineConfig({
         display: "standalone",
         icons: [
           {
-            src: "img/icons/kitty-icon-new.png",
+            src: "img/icons/kitty-icon-new.png?v=20260812",
             type: "image/png",
+            sizes: "1100x1100",
             purpose: "any",
           },
         ],

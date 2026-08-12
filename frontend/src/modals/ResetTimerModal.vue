@@ -5,7 +5,7 @@ const emit = defineEmits(["closeModal", "reset"]);
 
 <template>
   <TTDrawer
-    title="Reset Timer"
+    title="Reset"
     v-model="model"
     kitty="/img/kitties/sadKitty.gif"
     altKitty="sad kitty"

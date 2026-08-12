@@ -357,14 +357,14 @@ function refreshDataAfterProjectChange() {
 
   <AddSessionModal
     v-model="addingSession"
-    @sessionAdded="fetchSessions(true)"
+    @sessionAdded="fetchSessions(true); showProjectTime()"
   />
 
   <EditSessionModal
     v-model="isEditModalOpen"
     :session="selectedSession"
-    @sessionUpdated="fetchSessions(true)"
-    @sessionDeleted="fetchSessions(true)"
+    @sessionUpdated="fetchSessions(true); showProjectTime()"
+    @sessionDeleted="fetchSessions(true); showProjectTime()"
   />
 </template>
 
