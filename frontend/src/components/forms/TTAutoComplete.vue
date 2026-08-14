@@ -66,6 +66,10 @@ onBeforeUnmount(() =>
 .p-floatlabel {
   width: 100% !important;
 
+  &:has(.p-inputtext.p-filled) label {
+    background-color: var(--primary-color-dark) !important;
+  }
+
   &:has(.p-inputtext:focus) label {
     background-color: var(--secondary-color) !important;
     color: var(--primary-color) !important;
@@ -93,7 +97,7 @@ onBeforeUnmount(() =>
 }
 
 label {
-  background-color: var(--primary-color-dark) !important;
+  background-color: transparent !important;
   color: var(--white) !important;
   padding: 0 var(--gap-1) !important;
 }

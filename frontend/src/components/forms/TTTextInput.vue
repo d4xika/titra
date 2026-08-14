@@ -37,7 +37,13 @@ const model = defineModel({
     border: 2px solid var(--secondary-color) !important;
   }
 
-  &:has(.p-inputtext:focus) label {
+  &:has(.p-inputtext.p-filled) label,
+  &:has(.p-inputwrapper-filled) label {
+    background-color: var(--primary-color-dark) !important;
+  }
+
+  &:has(.p-inputtext:focus) label,
+  &:has(.p-inputwrapper-focus) label {
     background-color: var(--secondary-color) !important;
     color: var(--primary-color) !important;
   }
@@ -64,7 +70,7 @@ const model = defineModel({
 }
 
 label {
-  background-color: var(--primary-color-dark) !important;
+  background-color: transparent !important;
   color: var(--white) !important;
   padding: 0 var(--gap-1) !important;
 }
