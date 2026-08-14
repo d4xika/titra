@@ -116,7 +116,7 @@ onMounted(() => {
 
 <template>
   <TTDrawer
-    title="Select project"
+    title="Projects"
     v-model="model"
     kitty="/img/kitties/workingKitty.gif"
     altKitty="working kitty"
@@ -132,6 +132,7 @@ onMounted(() => {
           >
             all projects
           </li>
+          <li class="project-divider" aria-hidden="true"></li>
           <template v-if="isLoadingProjects">
             <li
               v-for="placeholder in 4"
@@ -153,11 +154,12 @@ onMounted(() => {
             class="project-li"
           >
             <div v-if="editingProjectId === project.id" class="edit-container">
-              <input v-model="editProjectName" class="edit-input" />
+              <TTTextInput v-model="editProjectName" />
               <div class="edit-icons">
                 <i class="pi pi-check" @click="saveEdit"></i>
                 <i class="pi pi-times" @click="cancelEdit"></i>
               </div>
+              <i class="pi pi-trash" @click="askConfirmDelete(project.id)"></i>
             </div>
 
             <div
@@ -184,10 +186,6 @@ onMounted(() => {
               </span>
               <div class="action-icons">
                 <i class="pi pi-pencil" @click="startEdit(project)"></i>
-                <i
-                  class="pi pi-trash"
-                  @click="askConfirmDelete(project.id)"
-                ></i>
               </div>
             </div>
           </li>
@@ -207,62 +205,70 @@ onMounted(() => {
 <style scoped>
 .select-project-container {
   display: flex;
-  align-items: center;
   flex-direction: column;
+  align-items: center;
+  gap: var(--gap-3);
   width: 100%;
   padding: 0 var(--gap-1);
-  gap: var(--gap-3);
   margin-top: var(--gap-2);
+  text-align: left;
 
   .project-list {
-    list-style: none;
-    padding: 0;
     width: min(100%, 20.6rem);
     max-height: 40vh;
+    padding: 0;
     margin: 0;
     overflow-y: auto;
+    list-style: none;
 
     li {
-      width: 100%;
-      min-height: 2rem;
       display: flex;
       align-items: center;
-      border-radius: var(--border-radius-1);
+      width: 100%;
+      min-height: 2rem;
       margin-bottom: var(--gap-1);
-      transition: background-color 0.2s;
       box-sizing: border-box;
+      border-radius: var(--border-radius-1);
+      transition: background-color 0.2s;
+    }
 
-      &.all-projects-li {
-        padding: var(--gap-2);
-        cursor: pointer;
-        justify-content: center;
-        border-bottom: 2px solid var(--primary-color);
-        margin-bottom: var(--gap-2);
+    .all-projects-li {
+      justify-content: start;
+      padding: var(--gap-2) var(--gap-3);
+      cursor: pointer;
 
-        &:hover {
-          background-color: var(--white-transparent);
-        }
-
-        &.selected {
-          background-color: var(--primary-color);
-        }
+      &:hover {
+        background-color: var(--white-transparent);
       }
 
-      &.project-li {
-        padding: 0;
+      &.selected {
+        background-color: var(--primary-color-dark);
       }
+    }
+
+    .project-divider {
+      height: 1px;
+      min-height: 1px;
+      margin: 0 0 var(--gap-2);
+      background-color: var(--white-transparent);
+      border-radius: 0;
+    }
+
+    .project-li {
+      padding: 0;
+      margin-bottom: var(--gap-2);
     }
 
     .project-item,
     .edit-container,
     .delete-confirm-container {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
       width: 100%;
-      padding: var(--gap-2);
-      border-radius: var(--border-radius-1);
+      padding: var(--gap-2) var(--gap-3);
       box-sizing: border-box;
+      border-radius: var(--border-radius-1);
     }
 
     .project-item {
@@ -271,12 +277,12 @@ onMounted(() => {
       }
 
       &.selected {
-        background-color: var(--primary-color);
+        background-color: var(--primary-color-dark);
       }
 
       .project-name {
-        cursor: pointer;
         flex-grow: 1;
+        cursor: pointer;
         word-break: break-all;
       }
     }
@@ -285,47 +291,37 @@ onMounted(() => {
     .edit-icons,
     .delete-icons {
       i {
-        cursor: pointer;
+        font-size: var(--font-size-1);
+        flex-shrink: 0;
         padding: var(--gap-1);
         margin-left: var(--gap-2);
         border-radius: var(--border-radius-1);
-        flex-shrink: 0;
+        cursor: pointer;
       }
+    }
+
+    .action-icons i:hover,
+    .delete-icons i:hover {
+      background-color: var(--primary-color-dark);
     }
 
     .action-icons i:hover {
       color: var(--white);
-      background-color: rgba(0, 0, 0, 0.2);
     }
 
-    .edit-container {
-      background-color: rgba(0, 0, 0, 0.2);
-
-      .edit-input {
-        width: 100%;
-        flex-grow: 1;
-        background: var(--white);
-        color: var(--primary-color);
-        border: none;
-        border-radius: var(--border-radius-1);
-        padding: var(--gap-1);
-        font-family: inherit;
-        font-size: var(--font-size-1-5);
-      }
+    .edit-container,
+    .delete-confirm-container {
+      background-color: var(--primary-color-dark);
     }
 
     .delete-confirm-container {
       color: var(--white);
-
-      .delete-icons i:hover {
-        background-color: rgba(0, 0, 0, 0.2);
-      }
     }
   }
 
   .text-button {
-    font-size: var(--font-size-1-5);
     padding: 0 var(--gap-2);
+    font-size: var(--font-size-1-5);
   }
 }
 </style>
