@@ -64,6 +64,8 @@ const model = defineModel({
 }
 
 label {
+  background-color: var(--primary-color-dark) !important;
   color: var(--white) !important;
+  padding: 0 var(--gap-1) !important;
 }
 </style>
