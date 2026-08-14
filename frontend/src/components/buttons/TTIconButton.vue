@@ -6,7 +6,7 @@ const props = defineProps({
   variant: {
     type: String,
     default: "square",
-    validator: (value) => ["circle", "square"].includes(value),
+    validator: (value) => ["circle", "plain", "square"].includes(value),
   },
 });
 </script>
@@ -21,8 +21,7 @@ const props = defineProps({
 <style scoped>
 .buttonContainer {
   background-color: var(--primary-color);
-  min-width: var(--font-size-3);
-  min-height: var(--font-size-3);
+
   padding: calc(var(--gap-2) + var(--gap-1));
   display: flex;
   justify-content: center;
@@ -36,10 +35,28 @@ const props = defineProps({
 
   &.variant-square {
     border-radius: var(--border-radius-2);
+    min-width: var(--font-size-3);
+    min-height: var(--font-size-3);
   }
 
   &.variant-circle {
     border-radius: 50%;
+    min-width: var(--font-size-3);
+    min-height: var(--font-size-3);
+  }
+
+  &.variant-plain {
+    min-width: var(--font-size-1);
+    min-height: var(--font-size-1);
+    padding: 0;
+    background-color: transparent;
+    border-radius: var(--border-radius-1);
+    box-shadow: none;
+
+    &:hover {
+      transform: none;
+      box-shadow: none;
+    }
   }
 
   &:hover {

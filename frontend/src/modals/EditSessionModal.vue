@@ -65,6 +65,8 @@ async function fetchProjectName(projectId) {
 }
 
 const filteredProjects = computed(() => {
+  loadProjects();
+
   const query = projectName.value.toLowerCase();
   if (!query) return allProjects.value;
 

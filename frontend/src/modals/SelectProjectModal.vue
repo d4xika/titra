@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { computed, ref, onMounted } from "vue";
 import API from "@/helper/api.js";
 import { useTTToast } from "@/helper/useTTToast.js";
 
@@ -18,14 +18,29 @@ const tempSelectedProject = ref(props.initialSelection);
 const editingProjectId = ref(null);
 const editProjectName = ref("");
 const deletingProjectId = ref(null);
+const actionMenuProjectId = ref(null);
 const isLoadingProjects = ref(true);
+const showArchivedProjects = ref(false);
+
+const activeProjects = computed(() =>
+  projects.value.filter((project) => !project.archived),
+);
+const archivedProjects = computed(() =>
+  projects.value.filter((project) => project.archived),
+);
 
 async function fetchProjects() {
   isLoadingProjects.value = true;
 
   try {
-    const response = await API.get("projects");
+    const response = await API.get("projects", {
+      params: { include_archived: true },
+    });
     projects.value = response.data;
+    showArchivedProjects.value = projects.value.some(
+      (project) =>
+        project.archived && project.name === tempSelectedProject.value,
+    );
   } catch (error) {
     toast.apiError(error, "Could not load projects.");
   } finally {
@@ -42,11 +57,18 @@ function startEdit(project) {
   editingProjectId.value = project.id;
   editProjectName.value = project.name;
   deletingProjectId.value = null;
+  actionMenuProjectId.value = null;
 }
 
 function cancelEdit() {
   editingProjectId.value = null;
   editProjectName.value = "";
+  actionMenuProjectId.value = null;
+}
+
+function toggleActionMenu(projectId) {
+  actionMenuProjectId.value =
+    actionMenuProjectId.value === projectId ? null : projectId;
 }
 
 async function saveEdit() {
@@ -81,9 +103,36 @@ async function saveEdit() {
   }
 }
 
+async function setProjectArchived(project, archived) {
+  try {
+    await API.patch(`projects/${project.id}`, {
+      project: { archived },
+    });
+
+    project.archived = archived;
+    if (archived) showArchivedProjects.value = true;
+    emit("projectsChanged");
+    toast.success(archived ? "Project archived." : "Project restored.");
+    return true;
+  } catch (error) {
+    toast.apiError(
+      error,
+      archived
+        ? "Could not archive the project."
+        : "Could not restore the project.",
+    );
+    return false;
+  }
+}
+
+async function archiveEditedProject(project) {
+  if (await setProjectArchived(project, true)) cancelEdit();
+}
+
 function askConfirmDelete(projectId) {
   deletingProjectId.value = projectId;
   editingProjectId.value = null;
+  actionMenuProjectId.value = null;
 }
 
 function cancelDelete() {
@@ -124,7 +173,7 @@ onMounted(() => {
   >
     <template #body>
       <div class="select-project-container">
-        <ul class="project-list" :aria-busy="isLoadingProjects">
+        <ul class="project-list">
           <li
             @click="tempSelectedProject = 'all projects'"
             :class="{ selected: tempSelectedProject === 'all projects' }"
@@ -132,13 +181,12 @@ onMounted(() => {
           >
             all projects
           </li>
-          <li class="project-divider" aria-hidden="true"></li>
+          <li class="project-divider"></li>
           <template v-if="isLoadingProjects">
             <li
               v-for="placeholder in 4"
               :key="`project-skeleton-${placeholder}`"
               class="project-skeleton"
-              aria-hidden="true"
             >
               <Skeleton
                 width="100%"
@@ -148,18 +196,59 @@ onMounted(() => {
             </li>
           </template>
           <li
+            v-for="project in activeProjects"
             v-else
-            v-for="project in projects"
             :key="project.id"
             class="project-li"
           >
             <div v-if="editingProjectId === project.id" class="edit-container">
               <TTTextInput v-model="editProjectName" />
-              <div class="edit-icons">
-                <i class="pi pi-check" @click="saveEdit"></i>
-                <i class="pi pi-times" @click="cancelEdit"></i>
+              <div class="action-icons">
+                <div class="yes-no-icons">
+                  <TTIconButton
+                    class="action-icon-button"
+                    icon="pi pi-check"
+                    variant="plain"
+                    @click="saveEdit"
+                  />
+                  <TTIconButton
+                    class="action-icon-button"
+                    icon="pi pi-times"
+                    variant="plain"
+                    @click="cancelEdit"
+                  />
+                </div>
+
+                <div class="project-actions-menu">
+                  <TTIconButton
+                    class="action-icon-button"
+                    icon="pi pi-ellipsis-v"
+                    variant="plain"
+                    @click="toggleActionMenu(project.id)"
+                  />
+                  <div
+                    v-if="actionMenuProjectId === project.id"
+                    class="project-actions-dropdown"
+                  >
+                    <TTIconButton
+                      class="project-dropdown-action"
+                      icon="pi pi-folder"
+                      variant="plain"
+                      @click="archiveEditedProject(project)"
+                    >
+                      <span>Archive</span>
+                    </TTIconButton>
+                    <TTIconButton
+                      class="project-dropdown-action delete-action"
+                      icon="pi pi-trash"
+                      variant="plain"
+                      @click="askConfirmDelete(project.id)"
+                    >
+                      <span>Delete</span>
+                    </TTIconButton>
+                  </div>
+                </div>
               </div>
-              <i class="pi pi-trash" @click="askConfirmDelete(project.id)"></i>
             </div>
 
             <div
@@ -167,9 +256,17 @@ onMounted(() => {
               class="delete-confirm-container"
             >
               <span>Delete project?</span>
-              <div class="delete-icons">
-                <i class="pi pi-check" @click="deleteProject(project.id)"></i>
-                <i class="pi pi-times" @click="cancelDelete"></i>
+              <div class="action-icons">
+                <TTIconButton
+                  icon="pi pi-check"
+                  variant="plain"
+                  @click="deleteProject(project.id)"
+                />
+                <TTIconButton
+                  icon="pi pi-times"
+                  variant="plain"
+                  @click="cancelDelete"
+                />
               </div>
             </div>
 
@@ -185,10 +282,59 @@ onMounted(() => {
                 {{ project.name }}
               </span>
               <div class="action-icons">
-                <i class="pi pi-pencil" @click="startEdit(project)"></i>
+                <TTIconButton
+                  class="action-icon-button"
+                  icon="pi pi-pencil"
+                  variant="plain"
+                  @click="startEdit(project)"
+                />
               </div>
             </div>
           </li>
+
+          <li
+            v-if="!isLoadingProjects && archivedProjects.length"
+            class="archived-projects-toggle-container"
+          >
+            <TTIconButton
+              class="archived-projects-toggle"
+              :icon="
+                showArchivedProjects ? 'pi pi-chevron-up' : 'pi pi-chevron-down'
+              "
+              variant="plain"
+              @click="showArchivedProjects = !showArchivedProjects"
+            >
+              <span>Archived ({{ archivedProjects.length }})</span>
+            </TTIconButton>
+          </li>
+
+          <template v-if="showArchivedProjects">
+            <li
+              v-for="project in archivedProjects"
+              :key="project.id"
+              class="project-li archived-project-li"
+            >
+              <div
+                class="project-item"
+                :class="{ selected: tempSelectedProject === project.name }"
+              >
+                <span
+                  class="project-name"
+                  @click="tempSelectedProject = project.name"
+                >
+                  {{ project.name }}
+                </span>
+                <div class="action-icons">
+                  <TTIconButton
+                    class="action-icon-button"
+                    icon="pi pi-replay"
+                    variant="plain"
+                    @click="setProjectArchived(project, false)"
+                  />
+                </div>
+              </div>
+            </li>
+          </template>
         </ul>
 
         <TTTextButton
@@ -259,6 +405,26 @@ onMounted(() => {
       margin-bottom: var(--gap-2);
     }
 
+    .archived-projects-toggle-container {
+      margin-top: var(--gap-2);
+
+      .archived-projects-toggle {
+        display: flex;
+        flex-direction: row-reverse;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: var(--gap-2) var(--gap-3);
+        background-color: var(--primary-color-dark);
+        color: var(--white);
+        border-radius: var(--border-radius-1);
+        font: inherit;
+      }
+    }
+
+    .archived-project-li {
+      opacity: 0.75;
+    }
     .project-item,
     .edit-container,
     .delete-confirm-container {
@@ -287,31 +453,63 @@ onMounted(() => {
       }
     }
 
-    .action-icons,
-    .edit-icons,
-    .delete-icons {
-      i {
-        font-size: var(--font-size-1);
-        flex-shrink: 0;
+    .action-icons {
+      display: flex;
+      align-items: center;
+
+      .action-icon-button {
         padding: var(--gap-1);
-        margin-left: var(--gap-2);
-        border-radius: var(--border-radius-1);
-        cursor: pointer;
+
+        &:hover {
+          background-color: var(--primary-color-dark);
+          color: var(--white);
+        }
       }
-    }
 
-    .action-icons i:hover,
-    .delete-icons i:hover {
-      background-color: var(--primary-color-dark);
-    }
-
-    .action-icons i:hover {
-      color: var(--white);
+      .yes-no-icons {
+        display: flex;
+        flex-direction: column;
+        padding: 0 var(--gap-1);
+      }
     }
 
     .edit-container,
     .delete-confirm-container {
       background-color: var(--primary-color-dark);
+    }
+
+    .project-actions-menu {
+      position: relative;
+    }
+
+    .project-actions-dropdown {
+      position: absolute;
+      top: calc(100% + var(--gap-1));
+      right: 0;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      min-width: 7.5rem;
+      padding: var(--gap-1);
+      background-color: var(--primary-color-dark);
+      border-radius: var(--border-radius-1);
+      box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.25);
+
+      .project-dropdown-action {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        gap: var(--gap-2);
+        width: 100%;
+        padding: var(--gap-1) var(--gap-2);
+        border-radius: var(--border-radius-1);
+        text-align: left;
+        font: inherit;
+
+        &:hover {
+          background-color: var(--white-transparent);
+        }
+      }
     }
 
     .delete-confirm-container {

@@ -8,6 +8,9 @@ class Api::ProjectsController < Api::ApplicationController
     end
 
     @projects = current_user.projects
+    unless ActiveModel::Type::Boolean.new.cast(params[:include_archived])
+      @projects = @projects.where(archived: false)
+    end
     return render json: @projects, status: :ok
   end
 
@@ -34,7 +37,7 @@ class Api::ProjectsController < Api::ApplicationController
   def update
     @project = current_user.projects.find_by(id: params[:name]) || current_user.projects.find_by(name: params[:name])
 
-    if @project.update(name: params[:project][:name])
+    if @project.update(project_params)
       return render json: @project, status: :ok
     else
       return render json: { errors: @project.errors.full_messages }, status: :unprocessable_entity
@@ -50,6 +53,6 @@ class Api::ProjectsController < Api::ApplicationController
   private
 
   def project_params
-    params.require(:project).permit(:name)
+    params.require(:project).permit(:name, :archived)
   end
 end

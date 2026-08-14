@@ -47,12 +47,12 @@ function getMessage(message) {
 }
 
 .p-toast .p-toast-message-info {
-  background-color: var(--primary-color) !important;
+  background-color: var(--primary-color-dark) !important;
   border: 1px solid var(--white) !important;
 }
 
 .p-toast .p-toast-message-success {
-  background-color: var(--primary-color) !important;
+  background-color: var(--primary-color-dark) !important;
   border: 1px solid var(--white) !important;
 }
 
@@ -62,8 +62,8 @@ function getMessage(message) {
 }
 
 .p-toast .p-toast-message-warn {
-  background-color: var(--primary-color-dark) !important;
-  border: 1px solid var(--primary-color-transparent) !important;
+  background-color: var(--primary-color) !important;
+  border: 1px solid var(--white) !important;
 }
 </style>
 

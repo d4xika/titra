@@ -273,6 +273,7 @@ function handleSelectButtonUpdate(nextVal) {
     }
 
     .input-box {
+      text-align: center;
       background-color: var(--primary-color);
       color: var(--white);
       font-size: var(--font-size-3);
