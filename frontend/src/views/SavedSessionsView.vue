@@ -4,6 +4,7 @@ import API from "@/helper/api.js";
 import SelectProjectModal from "@/modals/SelectProjectModal.vue";
 import AddSessionModal from "@/modals/AddSessionModal.vue";
 import EditSessionModal from "@/modals/EditSessionModal.vue";
+import router, { setAuthStatus } from "@/router/router.js";
 
 const timeWindowSelection = ref("D");
 const projectSelection = ref("all projects");
@@ -262,15 +263,27 @@ function refreshDataAfterProjectChange() {
   fetchSessions(true);
   showProjectTime();
 }
+
+function logout() {
+  API.put("users/logout")
+    .then()
+    .finally(() => {
+      setAuthStatus(false);
+      router.push({ name: "welcome" });
+    });
+}
 </script>
 
 <template>
   <div class="main-container">
     <TTIconButton
-      @click="$router.push('/')"
+      @click="$router.push({ name: 'home' })"
       class="home-button"
       icon="pi pi-clock"
     />
+
+    <TTIconButton @click="logout" class="logout-button" icon="pi pi-sign-out" />
+
     <div class="time-windows">
       <TTSelectButton
         :modelValue="timeWindowSelection"
@@ -411,6 +424,12 @@ function refreshDataAfterProjectChange() {
   .home-button {
     position: fixed;
     left: 2rem;
+    top: 2rem;
+  }
+
+  .logout-button {
+    position: fixed;
+    right: 2rem;
     top: 2rem;
   }
 
