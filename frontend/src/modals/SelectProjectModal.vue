@@ -1,6 +1,7 @@
 <script setup>
 import { ref, onMounted } from "vue";
 import API from "@/helper/api.js";
+import { useTTToast } from "@/helper/useTTToast.js";
 
 const props = defineProps({
   initialSelection: {
@@ -10,6 +11,7 @@ const props = defineProps({
 });
 const model = defineModel({ type: Boolean, default: false });
 const emit = defineEmits(["closeModal", "selectProject", "projectsChanged"]);
+const toast = useTTToast();
 
 const projects = ref([]);
 const tempSelectedProject = ref(props.initialSelection);
@@ -25,7 +27,7 @@ async function fetchProjects() {
     const response = await API.get("projects");
     projects.value = response.data;
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not load projects.");
   } finally {
     isLoadingProjects.value = false;
   }
@@ -48,7 +50,10 @@ function cancelEdit() {
 }
 
 async function saveEdit() {
-  if (!editProjectName.value || !editingProjectId.value) return;
+  if (!editProjectName.value.trim() || !editingProjectId.value) {
+    toast.warn("Please enter a project name.");
+    return;
+  }
 
   try {
     await API.patch(`projects/${editingProjectId.value}`, {
@@ -69,9 +74,10 @@ async function saveEdit() {
     }
     emit("projectsChanged");
 
+    toast.success("Project renamed.");
     cancelEdit();
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not rename the project.");
   }
 }
 
@@ -96,9 +102,10 @@ async function deleteProject(projectId) {
     }
     emit("projectsChanged");
 
+    toast.success("Project deleted.");
     cancelDelete();
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not delete the project.");
   }
 }
 

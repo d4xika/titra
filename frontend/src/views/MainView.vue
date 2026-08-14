@@ -3,11 +3,13 @@ import { ref, onMounted, computed } from "vue";
 import FinishedTimerModal from "@/modals/FinishedTimerModal.vue";
 import ResetTimerModal from "@/modals/ResetTimerModal.vue";
 import API from "@/helper/api.js";
+import { useTTToast } from "@/helper/useTTToast.js";
 
 const timerSelection = ref("pi pi-stopwatch");
 const selectButtonKey = ref(0);
 const countdownStartTime = ref(null);
 const sessionId = ref(null);
+const toast = useTTToast();
 
 const timer = ref({
   startTime: null,
@@ -25,6 +27,15 @@ const isTimerActive = computed(() => {
 const intervalId = ref(null);
 
 function startTimer() {
+  if (
+    timerSelection.value === "pi pi-hourglass" &&
+    (!Number.isFinite(Number(countdownStartTime.value)) ||
+      Number(countdownStartTime.value) <= 0)
+  ) {
+    toast.warn("Enter a countdown longer than zero minutes.");
+    return;
+  }
+
   const now = Date.now();
 
   timer.value.startTime = now - timer.value.elapsedBeforePause * 1000;
@@ -72,6 +83,11 @@ function resetTimer() {
 }
 
 async function stopTimer() {
+  if (!timer.value.running && timer.value.elapsedBeforePause <= 0) {
+    toast.info("Start the timer before saving a session.");
+    return;
+  }
+
   if (timer.value.running) {
     pauseTimer();
   }
@@ -93,7 +109,7 @@ async function stopTimer() {
     resetTimer();
     timer.value.finished = true;
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not save the timed session.");
   }
 }
 

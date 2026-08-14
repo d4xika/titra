@@ -4,9 +4,11 @@ import { useRouter } from "vue-router";
 import { LiveActivities } from "live-activities";
 import API from "@/helper/api.js";
 import { setAuthStatus } from "@/router/router.js";
-import TTDrawer from "@/components/TTDrawer.vue";
+import TTDrawer from "@/components/misc/TTDrawer.vue";
+import { useTTToast } from "@/helper/useTTToast.js";
 
 const router = useRouter();
+const toast = useTTToast();
 const activityId = ref(null);
 const showLoginModal = ref(false);
 const showRegisterModal = ref(false);
@@ -42,62 +44,64 @@ async function register() {
     email.value.length === 0 ||
     password.value.length === 0
   ) {
-    //addtoast
+    toast.warn("Please fill in username, email, and password.");
     return;
   }
 
   if (password.value !== passwordRepeat.value) {
-    //addtoast
+    toast.warn("The passwords do not match.");
     return;
   }
 
-  API.get("csrf").then((response) => {
+  try {
+    const response = await API.get("csrf");
     API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
 
-    API.post("users/register", {
+    const registerResponse = await API.post("users/register", {
       username: username.value,
       password: password.value,
       email: email.value,
-    }).then(
-      (response) => {
-        localStorage.setItem("user", JSON.stringify(response.data));
-        setAuthStatus(true);
-        router.push("/home");
-      },
-      (error) => {
-        console.log(error);
-      },
-    );
-  });
+    });
+
+    localStorage.setItem("user", JSON.stringify(registerResponse.data));
+    setAuthStatus(true);
+    toast.success("Account created. Welcome!");
+    await router.push("/home");
+  } catch (error) {
+    if (error.response?.status === 409) {
+      toast.error("That username or email is already in use.");
+    } else {
+      toast.apiError(error, "Could not create your account. Please try again.");
+    }
+  }
 }
 
 async function login() {
   if (username.value.length === 0 || password.value.length === 0) {
-    //addtoast
+    toast.warn("Please enter your username and password.");
     return;
   }
 
-  API.get("csrf").then((response) => {
+  try {
+    const response = await API.get("csrf");
     API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
 
-    API.post("users/login", {
+    const loginResponse = await API.post("users/login", {
       username: username.value,
       password: password.value,
-    }).then(
-      (response) => {
-        localStorage.setItem("user", JSON.stringify(response.data));
-        setAuthStatus(true);
-        router.push("/home");
-      },
-      (error) => {
-        if (error.status === 409) {
-          // help
-        } else {
-          // help
-        }
-      },
-    );
-  });
+    });
+
+    localStorage.setItem("user", JSON.stringify(loginResponse.data));
+    setAuthStatus(true);
+    toast.success("Welcome back!");
+    await router.push("/home");
+  } catch (error) {
+    if ([401, 409].includes(error.response?.status)) {
+      toast.error("Username or password is incorrect.");
+    } else {
+      toast.apiError(error, "Could not log in. Please try again.");
+    }
+  }
 }
 </script>
 

@@ -5,6 +5,7 @@ import SelectProjectModal from "@/modals/SelectProjectModal.vue";
 import AddSessionModal from "@/modals/AddSessionModal.vue";
 import EditSessionModal from "@/modals/EditSessionModal.vue";
 import router, { setAuthStatus } from "@/router/router.js";
+import { useTTToast } from "@/helper/useTTToast.js";
 
 const timeWindowSelection = ref("D");
 const projectSelection = ref("all projects");
@@ -22,6 +23,7 @@ const projectNamesCache = ref({});
 const isEditModalOpen = ref(false);
 const selectedSession = ref(null);
 const currentReferenceDate = ref(new Date());
+const toast = useTTToast();
 showProjectTime();
 fetchSessions(true);
 
@@ -113,15 +115,11 @@ async function showProjectTime() {
   try {
     let projectId = null;
     if (projectSelection.value !== "all projects") {
-      try {
-        const response = await API.get(`projects`, {
-          params: { name: projectSelection.value },
-        });
-        if (response.data) {
-          projectId = response.data.id;
-        }
-      } catch (error) {
-        console.log(error);
+      const projectResponse = await API.get(`projects`, {
+        params: { name: projectSelection.value },
+      });
+      if (projectResponse.data) {
+        projectId = projectResponse.data.id;
       }
     }
 
@@ -140,7 +138,7 @@ async function showProjectTime() {
 
     timeDisplay.value = formatDuration(response.data.total_duration);
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not load the time summary.");
     timeDisplay.value = formatDuration(0);
   } finally {
     isLoadingSummary.value = false;
@@ -164,15 +162,11 @@ async function fetchSessions(reset = false) {
 
     let projectId = null;
     if (projectSelection.value !== "all projects") {
-      try {
-        const response = await API.get(`projects`, {
-          params: { name: projectSelection.value },
-        });
-        if (response.data) {
-          projectId = response.data.id;
-        }
-      } catch (error) {
-        console.log(error);
+      const projectResponse = await API.get(`projects`, {
+        params: { name: projectSelection.value },
+      });
+      if (projectResponse.data) {
+        projectId = projectResponse.data.id;
       }
     }
 
@@ -194,7 +188,12 @@ async function fetchSessions(reset = false) {
       const uniqueProjectIds = [
         ...new Set(data.map((s) => s.project_id).filter((id) => id != null)),
       ];
-      await Promise.all(uniqueProjectIds.map(fetchProjectName));
+      const projectResults = await Promise.all(
+        uniqueProjectIds.map(fetchProjectName),
+      );
+      if (projectResults.some((loaded) => !loaded)) {
+        toast.warn("Some project names could not be loaded.");
+      }
 
       allSessions.value = [...allSessions.value, ...data];
       currentPage.value++;
@@ -206,7 +205,7 @@ async function fetchSessions(reset = false) {
       canLoadMore.value = false;
     }
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not load sessions.");
     canLoadMore.value = false;
   } finally {
     isLoadingSessions.value = false;
@@ -218,16 +217,19 @@ function getProjectNameFromCache(projectId) {
 }
 
 async function fetchProjectName(projectId) {
-  if (projectNamesCache.value[projectId]) return;
+  if (projectNamesCache.value[projectId]) return true;
 
   try {
     const response = await API.get(`projects/${encodeURIComponent(projectId)}`);
     if (response.data && response.data.name) {
       projectNamesCache.value[projectId] = response.data.name;
+      return true;
     }
-  } catch (error) {
-    console.log(error);
+  } catch {
+    return false;
   }
+
+  return false;
 }
 
 function formatDuration(totalSeconds) {
@@ -266,7 +268,10 @@ function refreshDataAfterProjectChange() {
 
 function logout() {
   API.put("users/logout")
-    .then()
+    .then(() => toast.success("Logged out."))
+    .catch((error) =>
+      toast.apiError(error, "The server could not complete logout."),
+    )
     .finally(() => {
       setAuthStatus(false);
       router.push({ name: "welcome" });

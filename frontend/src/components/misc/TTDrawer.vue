@@ -1,5 +1,5 @@
 <script setup>
-import TTDivider from "@/components/TTDivider.vue";
+import TTDivider from "@/components/misc/TTDivider.vue";
 
 const props = defineProps({
   title: {

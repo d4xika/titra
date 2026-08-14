@@ -1,10 +1,12 @@
 <script setup>
 import { ref, computed } from "vue";
 import API from "@/helper/api.js";
+import { useTTToast } from "@/helper/useTTToast.js";
 
 const props = defineProps({ id: { type: Number } });
 const model = defineModel({ type: Boolean, default: false });
 const emit = defineEmits(["closeModal"]);
+const toast = useTTToast();
 
 const projectName = ref("");
 const description = ref("");
@@ -17,7 +19,7 @@ async function loadProjects() {
     const response = await API.get("projects");
     allProjects.value = response.data;
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not load projects.");
   }
 }
 
@@ -31,12 +33,11 @@ const filteredProjects = computed(() => {
 });
 
 async function updateProjectInfo() {
-  const projectNameString = projectName.value;
+  try {
+    const projectNameString = projectName.value;
+    let projectId = null;
 
-  let projectId = null;
-
-  if (projectNameString) {
-    try {
+    if (projectNameString) {
       const response = await API.get(`projects`, {
         params: { name: projectNameString },
       });
@@ -48,20 +49,22 @@ async function updateProjectInfo() {
         });
         projectId = createResponse.data.id;
       }
-    } catch (error) {
-      console.log(error);
     }
+
+    await API.patch(`sessions/${props.id}`, {
+      session: {
+        project_id: projectId,
+        description: description.value,
+      },
+    });
+
+    projectName.value = "";
+    description.value = "";
+    toast.success("Session details saved.");
+    emit("closeModal");
+  } catch (error) {
+    toast.apiError(error, "Could not save the session details.");
   }
-
-  await API.patch(`sessions/${props.id}`, {
-    session: {
-      project_id: projectId,
-      description: description.value,
-    },
-  });
-
-  projectName.value = "";
-  description.value = "";
 }
 </script>
 
@@ -85,12 +88,7 @@ async function updateProjectInfo() {
 
         <TTTextInput label="Description" v-model="description" />
         <TTTextButton
-          @click="
-            async () => {
-              await updateProjectInfo();
-              emit('closeModal');
-            }
-          "
+          @click="updateProjectInfo"
           variant="light-version"
           text="Save"
         ></TTTextButton>

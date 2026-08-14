@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed, watch } from "vue";
 import API from "@/helper/api.js";
+import { useTTToast } from "@/helper/useTTToast.js";
 
 const props = defineProps({
   session: {
@@ -11,6 +12,7 @@ const props = defineProps({
 
 const model = defineModel({ type: Boolean, default: false });
 const emit = defineEmits(["sessionUpdated", "sessionDeleted", "closeModal"]);
+const toast = useTTToast();
 
 const projectName = ref("");
 const description = ref("");
@@ -26,7 +28,7 @@ async function loadProjects() {
     const response = await API.get("projects");
     allProjects.value = response.data;
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not load projects.");
   }
 }
 
@@ -58,7 +60,7 @@ async function fetchProjectName(projectId) {
       projectName.value = response.data.name;
     }
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not load the session's project.");
   }
 }
 
@@ -88,7 +90,8 @@ async function saveSession() {
         projectId = createResponse.data.id;
       }
     } catch (error) {
-      console.log(error);
+      toast.apiError(error, "Could not save the project.");
+      return;
     }
   }
 
@@ -102,9 +105,10 @@ async function saveSession() {
       },
     });
     emit("sessionUpdated");
+    toast.success("Session updated.");
     close();
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not update the session.");
   }
 }
 
@@ -112,9 +116,10 @@ async function deleteSession() {
   try {
     await API.delete(`sessions/${props.session.id}`);
     emit("sessionDeleted");
+    toast.success("Session deleted.");
     close();
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not delete the session.");
   }
 }
 

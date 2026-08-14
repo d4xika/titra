@@ -8,6 +8,7 @@ import AutoComplete from "primevue/autocomplete";
 import InputText from "primevue/inputtext";
 import InputNumber from "primevue/inputnumber";
 import DatePicker from "primevue/datepicker";
+import ToastService from "primevue/toastservice";
 import "primeicons/primeicons.css";
 import "./core.scss";
 import router from "@/router/router.js";
@@ -22,6 +23,7 @@ app.use(PrimeVue, {
   },
 });
 app.use(router);
+app.use(ToastService);
 app.component("SelectButton", SelectButton);
 app.component("AutoComplete", AutoComplete);
 app.component("InputText", InputText);

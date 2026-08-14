@@ -1,9 +1,11 @@
 <script setup>
 import { ref, computed } from "vue";
 import API from "@/helper/api.js";
+import { useTTToast } from "@/helper/useTTToast.js";
 
 const model = defineModel({ type: Boolean, default: false });
 const emit = defineEmits(["sessionAdded", "closeModal"]);
+const toast = useTTToast();
 
 const projectName = ref("");
 const description = ref("");
@@ -18,7 +20,7 @@ async function loadProjects() {
     const response = await API.get("projects");
     allProjects.value = response.data;
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not load projects.");
   }
 }
 
@@ -48,7 +50,8 @@ async function addSession() {
         projectId = createResponse.data.id;
       }
     } catch (error) {
-      console.log(error);
+      toast.apiError(error, "Could not save the project.");
+      return;
     }
   }
 
@@ -62,9 +65,10 @@ async function addSession() {
       },
     });
     emit("sessionAdded");
+    toast.success("Session added.");
     close();
   } catch (error) {
-    console.log(error);
+    toast.apiError(error, "Could not add the session.");
   }
 }
 
