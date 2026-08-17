@@ -204,49 +204,17 @@ onMounted(() => {
             <div v-if="editingProjectId === project.id" class="edit-container">
               <TTTextInput v-model="editProjectName" />
               <div class="action-icons">
-                <div class="yes-no-icons">
+                <div class="yes-no-column-icons">
                   <TTIconButton
-                    class="action-icon-button"
                     icon="pi pi-check"
                     variant="plain"
                     @click="saveEdit"
                   />
                   <TTIconButton
-                    class="action-icon-button"
                     icon="pi pi-times"
                     variant="plain"
                     @click="cancelEdit"
                   />
-                </div>
-
-                <div class="project-actions-menu">
-                  <TTIconButton
-                    class="action-icon-button"
-                    icon="pi pi-ellipsis-v"
-                    variant="plain"
-                    @click="toggleActionMenu(project.id)"
-                  />
-                  <div
-                    v-if="actionMenuProjectId === project.id"
-                    class="project-actions-dropdown"
-                  >
-                    <TTIconButton
-                      class="project-dropdown-action"
-                      icon="pi pi-folder"
-                      variant="plain"
-                      @click="archiveEditedProject(project)"
-                    >
-                      <span>Archive</span>
-                    </TTIconButton>
-                    <TTIconButton
-                      class="project-dropdown-action delete-action"
-                      icon="pi pi-trash"
-                      variant="plain"
-                      @click="askConfirmDelete(project.id)"
-                    >
-                      <span>Delete</span>
-                    </TTIconButton>
-                  </div>
                 </div>
               </div>
             </div>
@@ -257,16 +225,18 @@ onMounted(() => {
             >
               <span>Delete project?</span>
               <div class="action-icons">
-                <TTIconButton
-                  icon="pi pi-check"
-                  variant="plain"
-                  @click="deleteProject(project.id)"
-                />
-                <TTIconButton
-                  icon="pi pi-times"
-                  variant="plain"
-                  @click="cancelDelete"
-                />
+                <div class="yes-no-row-icons">
+                  <TTIconButton
+                    icon="pi pi-check"
+                    variant="plain"
+                    @click="deleteProject(project.id)"
+                  />
+                  <TTIconButton
+                    icon="pi pi-times"
+                    variant="plain"
+                    @click="cancelDelete"
+                  />
+                </div>
               </div>
             </div>
 
@@ -281,13 +251,41 @@ onMounted(() => {
               >
                 {{ project.name }}
               </span>
-              <div class="action-icons">
+              <div class="project-actions-menu">
                 <TTIconButton
-                  class="action-icon-button"
-                  icon="pi pi-pencil"
+                  icon="pi pi-ellipsis-v"
                   variant="plain"
-                  @click="startEdit(project)"
+                  @click="toggleActionMenu(project.id)"
                 />
+                <div
+                  v-if="actionMenuProjectId === project.id"
+                  class="project-actions-dropdown"
+                >
+                  <TTIconButton
+                    class="project-dropdown-action"
+                    icon="pi pi-folder"
+                    variant="plain"
+                    @click="archiveEditedProject(project)"
+                  >
+                    <span>Archive</span>
+                  </TTIconButton>
+                  <TTIconButton
+                    class="project-dropdown-action"
+                    icon="pi pi-pencil"
+                    variant="plain"
+                    @click="startEdit(project)"
+                  >
+                    <span>Edit</span>
+                  </TTIconButton>
+                  <TTIconButton
+                    class="project-dropdown-action"
+                    icon="pi pi-trash"
+                    variant="plain"
+                    @click="askConfirmDelete(project.id)"
+                  >
+                    <span>Delete</span>
+                  </TTIconButton>
+                </div>
               </div>
             </div>
           </li>
@@ -326,7 +324,6 @@ onMounted(() => {
                 </span>
                 <div class="action-icons">
                   <TTIconButton
-                    class="action-icon-button"
                     icon="pi pi-replay"
                     variant="plain"
                     @click="setProjectArchived(project, false)"
@@ -457,19 +454,17 @@ onMounted(() => {
       display: flex;
       align-items: center;
 
-      .action-icon-button {
-        padding: var(--gap-1);
-
-        &:hover {
-          background-color: var(--primary-color-dark);
-          color: var(--white);
-        }
-      }
-
-      .yes-no-icons {
+      .yes-no-column-icons {
         display: flex;
         flex-direction: column;
-        padding: 0 var(--gap-1);
+        gap: var(--gap-1);
+        padding-left: var(--gap-2);
+      }
+
+      .yes-no-row-icons {
+        display: flex;
+        flex-direction: row;
+        gap: var(--gap-2);
       }
     }
 

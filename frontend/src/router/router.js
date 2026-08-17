@@ -72,7 +72,7 @@ export function setAuthStatus(status) {
     localStorage.removeItem("user");
     delete API.defaults.headers.common["X-CSRF-Token"];
   }
-  isAuthChecked = true;
+  isAuthChecked = status;
 }
 
 async function logoutAfterInvalidCsrf() {
