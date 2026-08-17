@@ -544,6 +544,7 @@ function logout() {
         flex-grow: 1;
         text-align: left;
         gap: var(--gap-1);
+        min-width: 0;
 
         .session-description {
           font-size: var(--font-size-1);
