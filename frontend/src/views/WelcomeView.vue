@@ -54,15 +54,14 @@ async function register() {
   }
 
   try {
-    const response = await API.get("csrf");
-    API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
-
     const registerResponse = await API.post("users/register", {
       username: username.value,
       password: password.value,
       email: email.value,
     });
 
+    API.defaults.headers.common["X-CSRF-Token"] =
+      registerResponse.data.csrf_token;
     localStorage.setItem("user", JSON.stringify(registerResponse.data));
     setAuthStatus(true);
     toast.success("Account created. Welcome!");
@@ -83,14 +82,13 @@ async function login() {
   }
 
   try {
-    const response = await API.get("csrf");
-    API.defaults.headers.common["X-CSRF-Token"] = response.data.csrf_token;
-
     const loginResponse = await API.post("users/login", {
       username: username.value,
       password: password.value,
     });
 
+    API.defaults.headers.common["X-CSRF-Token"] =
+      loginResponse.data.csrf_token;
     localStorage.setItem("user", JSON.stringify(loginResponse.data));
     setAuthStatus(true);
     toast.success("Welcome back!");

@@ -16,14 +16,14 @@ class Api::UsersController < Api::ApplicationController
       secure: Rails.env.production?
     })
 
-    return render json: render_user(user), status: :ok
+    return render json: authenticated_user_response(user), status: :ok
   end
 
   def is_logged_in
     if current_user
       render json: { authenticated: true, user: render_user(current_user), csrf_token: form_authenticity_token }, status: :ok
     else
-      render json: { authenticated: false }, status: :ok
+      render json: { authenticated: false, csrf_token: form_authenticity_token }, status: :ok
     end
   end
 
@@ -60,7 +60,7 @@ class Api::UsersController < Api::ApplicationController
       secure: Rails.env.production?
     })
 
-    return render json: render_user(user), status: :created
+    return render json: authenticated_user_response(user), status: :created
   end
 
   private
@@ -68,6 +68,13 @@ class Api::UsersController < Api::ApplicationController
   def render_user(user)
     return {
       username: user.username
+    }
+  end
+
+  def authenticated_user_response(user)
+    {
+      **render_user(user),
+      csrf_token: form_authenticity_token
     }
   end
 end
