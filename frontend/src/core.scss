@@ -1,14 +1,17 @@
 :root {
   --primary-color: #2c3e50;
-  --primary-color-dark: #011A1F8F;
-  --primary-color-transparent: #2c3e5030;
+  --primary-color-light: #011A1F8F;
+  --primary-color-transparent: #2c3e5040;
   --secondary-color: lightblue;
+  --secondary-color-light: #bfe6f3;
   --white: #d5d9e3;
   --white-transparent: rgb(213 217 227 / 30%);
   --red: #841414;
   --gap-1: 4px;
   --gap-2: 8px;
+  --gap-2-5: 12px;
   --gap-3: 16px;
+  --gap-3-5: 20px;
   --gap-4: 32px;
   --gap-5: 64px;
   --font-size-1: 12px;
@@ -17,6 +20,7 @@
   --font-size-3: 36px;
   --font-size-4: 48px;
   --border-radius-1: 6px;
+  --border-radius-1-5: 8px;
   --border-radius-2: 12px;
   --border-radius-3: 18px;
 }

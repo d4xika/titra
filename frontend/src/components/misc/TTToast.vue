@@ -47,12 +47,12 @@ function getMessage(message) {
 }
 
 .p-toast .p-toast-message-info {
-  background-color: var(--primary-color-dark) !important;
+  background-color: var(--primary-color-light) !important;
   border: 1px solid var(--white) !important;
 }
 
 .p-toast .p-toast-message-success {
-  background-color: var(--primary-color-dark) !important;
+  background-color: var(--primary-color-light) !important;
   border: 1px solid var(--white) !important;
 }
 

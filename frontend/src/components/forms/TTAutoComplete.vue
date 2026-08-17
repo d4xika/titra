@@ -67,7 +67,7 @@ onBeforeUnmount(() =>
   width: 100% !important;
 
   &:has(.p-inputtext.p-filled) label {
-    background-color: var(--primary-color-dark) !important;
+    background-color: var(--primary-color-light) !important;
   }
 
   &:has(.p-inputtext:focus) label {
@@ -83,7 +83,7 @@ onBeforeUnmount(() =>
 
 :deep(.p-inputtext) {
   width: 100%;
-  background-color: var(--primary-color-dark) !important;
+  background-color: var(--primary-color-light) !important;
   border: 1px solid var(--secondary-color) !important;
   padding: var(--gap-2) !important;
   color: var(--white) !important;

@@ -39,7 +39,7 @@ const model = defineModel({
 
   &:has(.p-inputtext.p-filled) label,
   &:has(.p-inputwrapper-filled) label {
-    background-color: var(--primary-color-dark) !important;
+    background-color: var(--primary-color-light) !important;
   }
 
   &:has(.p-inputtext:focus) label,
@@ -58,7 +58,7 @@ const model = defineModel({
 }
 
 :deep(.p-inputtext) {
-  background-color: var(--primary-color-dark) !important;
+  background-color: var(--primary-color-light) !important;
   border: 1px solid var(--secondary-color) !important;
   padding: var(--gap-2) !important;
   width: 100% !important;

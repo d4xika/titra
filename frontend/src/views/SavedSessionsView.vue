@@ -308,6 +308,7 @@ function logout() {
         <i class="pi pi-chevron-right"></i>
       </div>
     </div>
+
     <div class="time-container" :aria-busy="isLoadingSummary">
       <Skeleton
         v-if="isLoadingSummary"
@@ -317,6 +318,7 @@ function logout() {
       />
       <p v-else class="time-display-text">{{ timeDisplay }}</p>
     </div>
+
     <TTIconButton
       @click="selectingProject = true"
       class="project-selection-container"
@@ -347,11 +349,10 @@ function logout() {
             {{ session.description || "working hard" }}
           </div>
 
-          <div class="project-name">
-            {{
-              getProjectNameFromCache(session.project_id) || "important stuff"
-            }}
-          </div>
+          <TTTag
+            :text="getProjectNameFromCache(session.project_id)"
+            icon="pi pi-briefcase"
+          />
 
           <div class="session-duration">
             {{ formatDuration(session.duration) }}
@@ -506,41 +507,33 @@ function logout() {
     }
 
     .session-item {
-      background-color: var(--secondary-color);
-      border: 2px solid var(--primary-color);
+      background-color: var(--secondary-color-light);
+      border: 1px solid var(--primary-color-transparent);
       border-radius: var(--border-radius-2);
-      padding: var(--gap-2);
       display: flex;
       justify-content: center;
-      gap: var(--gap-3);
+      align-items: center;
+      gap: var(--gap-1);
       color: var(--primary-color);
       cursor: pointer;
+      box-shadow: var(--gap-1) var(--gap-1) var(--gap-2) rgba(0, 0, 0, 0.2);
 
-      .left-container {
+      .date-box {
         display: flex;
         flex-direction: column;
-        align-items: center;
-        width: 4rem;
-        gap: var(--gap-2);
+        justify-content: center;
+        background-color: var(--primary-color);
+        color: var(--white);
+        padding: var(--gap-2) var(--gap-3-5) var(--gap-1) var(--gap-3-5);
+        margin: var(--gap-2-5);
+        border-radius: var(--border-radius-1-5);
 
-        .date-box {
-          background-color: var(--primary-color);
-          padding-top: var(--gap-1);
-          color: var(--white);
-          border-radius: var(--border-radius-1);
-          width: 4rem;
-          height: 4rem;
-          display: flex;
-          flex-direction: column;
-          justify-content: center;
+        .date-month {
+          font-size: var(--font-size-1);
+        }
 
-          .date-month {
-            font-size: var(--font-size-1);
-          }
-
-          .date-day {
-            font-size: var(--font-size-2);
-          }
+        .date-day {
+          font-size: var(--font-size-2);
         }
       }
 
@@ -549,27 +542,12 @@ function logout() {
         justify-content: center;
         flex-direction: column;
         flex-grow: 1;
-        min-width: 0;
-        align-items: flex-start;
         text-align: left;
-        padding-right: var(--gap-2);
+        gap: var(--gap-1);
 
         .session-description {
-          font-size: var(--font-size-1-5);
-          font-weight: 600;
-          color: var(--primary-color);
-          width: 100%;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          margin-bottom: var(--gap-1);
-        }
-
-        .project-name {
           font-size: var(--font-size-1);
           color: var(--primary-color);
-          width: 100%;
-          margin-bottom: var(--gap-1);
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -578,8 +556,13 @@ function logout() {
         .session-duration {
           font-size: var(--font-size-1-5);
           color: var(--primary-color);
-          width: 100%;
+          font-weight: 700;
         }
+      }
+
+      &:hover {
+        transform: scale(1.01);
+        transition: transform 0.3s;
       }
     }
   }

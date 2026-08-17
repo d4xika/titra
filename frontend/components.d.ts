@@ -29,6 +29,7 @@ declare module 'vue' {
     TTIconButton: typeof import('./src/components/buttons/TTIconButton.vue')['default']
     TTNumberInput: typeof import('./src/components/forms/TTNumberInput.vue')['default']
     TTSelectButton: typeof import('./src/components/buttons/TTSelectButton.vue')['default']
+    TTTag: typeof import('./src/components/misc/TTTag.vue')['default']
     TTTextButton: typeof import('./src/components/buttons/TTTextButton.vue')['default']
     TTTextInput: typeof import('./src/components/forms/TTTextInput.vue')['default']
     TTToast: typeof import('./src/components/misc/TTToast.vue')['default']

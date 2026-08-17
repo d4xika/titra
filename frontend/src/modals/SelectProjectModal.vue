@@ -385,7 +385,7 @@ onMounted(() => {
       }
 
       &.selected {
-        background-color: var(--primary-color-dark);
+        background-color: var(--primary-color-light);
       }
     }
 
@@ -412,7 +412,7 @@ onMounted(() => {
         justify-content: space-between;
         width: 100%;
         padding: var(--gap-2) var(--gap-3);
-        background-color: var(--primary-color-dark);
+        background-color: var(--primary-color-light);
         color: var(--white);
         border-radius: var(--border-radius-1);
         font: inherit;
@@ -440,7 +440,7 @@ onMounted(() => {
       }
 
       &.selected {
-        background-color: var(--primary-color-dark);
+        background-color: var(--primary-color-light);
       }
 
       .project-name {
@@ -470,7 +470,7 @@ onMounted(() => {
 
     .edit-container,
     .delete-confirm-container {
-      background-color: var(--primary-color-dark);
+      background-color: var(--primary-color-light);
     }
 
     .project-actions-menu {
@@ -486,7 +486,7 @@ onMounted(() => {
       flex-direction: column;
       min-width: 7.5rem;
       padding: var(--gap-1);
-      background-color: var(--primary-color-dark);
+      background-color: var(--primary-color-light);
       border-radius: var(--border-radius-1);
       box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.25);
 
