@@ -19,14 +19,23 @@
   --font-size-2: 24px;
   --font-size-3: 36px;
   --font-size-4: 48px;
+  --safe-area-top: 0px;
+  --safe-area-bottom: 0px;
   --border-radius-1: 6px;
   --border-radius-1-5: 8px;
   --border-radius-2: 12px;
   --border-radius-3: 18px;
 }
 
+:root.native-platform {
+  --safe-area-top: env(safe-area-inset-top, 0px);
+  --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+}
+
 body {
   margin: 0;
+  box-sizing: border-box;
+  padding: var(--safe-area-top) 0 var(--safe-area-bottom);
   font-family: "Chakra Petch", sans-serif;
   font-weight: 400;
   background-color: lightblue;

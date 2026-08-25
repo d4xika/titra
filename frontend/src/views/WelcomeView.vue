@@ -149,7 +149,7 @@ async function login() {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100dvh;
+  height: calc(100dvh - var(--safe-area-top) - var(--safe-area-bottom));
 
   .content-container {
     display: flex;

@@ -430,13 +430,13 @@ function logout() {
   .home-button {
     position: fixed;
     left: 2rem;
-    top: 2rem;
+    top: max(2rem, var(--safe-area-top));
   }
 
   .logout-button {
     position: fixed;
     right: 2rem;
-    top: 2rem;
+    top: max(2rem, var(--safe-area-top));
   }
 
   .time-windows :deep(.p-togglebutton) {
@@ -572,6 +572,6 @@ function logout() {
 .add-session-button {
   position: fixed;
   right: var(--gap-4);
-  bottom: var(--gap-4);
+  bottom: max(var(--gap-4), var(--safe-area-bottom));
 }
 </style>

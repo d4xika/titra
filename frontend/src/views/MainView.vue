@@ -292,12 +292,12 @@ async function endActivity() {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100vh;
+  height: calc(100dvh - var(--safe-area-top) - var(--safe-area-bottom));
 
   .list-button {
     position: fixed;
     left: 2rem;
-    top: 2rem;
+    top: max(2rem, var(--safe-area-top));
   }
 
   .main-container {

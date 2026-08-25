@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import { Capacitor } from "@capacitor/core";
 import PrimeVue from "primevue/config";
 import App from "./App.vue";
 import "./registerServiceWorker";
@@ -12,6 +13,11 @@ import ToastService from "primevue/toastservice";
 import "primeicons/primeicons.css";
 import "./core.scss";
 import router from "@/router/router.js";
+
+document.documentElement.classList.toggle(
+  "native-platform",
+  Capacitor.isNativePlatform(),
+);
 
 const app = createApp(App);
 app.use(PrimeVue, {
