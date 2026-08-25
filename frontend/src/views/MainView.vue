@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import { Capacitor } from "@capacitor/core";
+import { LiveActivities } from "live-activities";
 import FinishedTimerModal from "@/modals/FinishedTimerModal.vue";
 import ResetTimerModal from "@/modals/ResetTimerModal.vue";
 import API from "@/helper/api.js";
@@ -25,6 +27,7 @@ const isTimerActive = computed(() => {
   return timer.value.running || timer.value.elapsedBeforePause > 0;
 });
 const intervalId = ref(null);
+const activityId = ref(null);
 
 function startTimer() {
   if (
@@ -46,11 +49,13 @@ function startTimer() {
   localStorage.setItem("timerRunning", "true");
   localStorage.setItem("elapsedBeforePause", timer.value.elapsedBeforePause);
 
+  updateTimerDisplay();
+  startLiveActivity();
+
   intervalId.value = setInterval(() => {
     updateTimerDisplay();
+    updateActivity();
   }, 1000);
-
-  updateTimerDisplay();
 }
 
 function pauseTimer() {
@@ -66,6 +71,8 @@ function pauseTimer() {
   localStorage.setItem("elapsedBeforePause", timer.value.elapsedBeforePause);
   localStorage.setItem("timerRunning", "false");
   localStorage.removeItem("timerStartTime");
+
+  endActivity();
 }
 
 function resetTimer() {
@@ -166,6 +173,46 @@ function handleSelectButtonUpdate(nextVal) {
     return;
   }
   timerSelection.value = nextVal;
+}
+
+async function startLiveActivity() {
+  if (Capacitor.getPlatform() !== "ios") return;
+
+  try {
+    const res = await LiveActivities.start({
+      value: timer.value.display,
+    });
+    activityId.value = res.activityId;
+  } catch {
+    toast.error("Failed to start Live Activity");
+  }
+}
+
+async function updateActivity() {
+  if (!activityId.value) return;
+
+  try {
+    await LiveActivities.update({
+      activityId: activityId.value,
+      value: timer.value.display,
+    });
+  } catch {
+    activityId.value = null;
+    toast.error("Failed to update Live Activity");
+  }
+}
+
+async function endActivity() {
+  if (!activityId.value) return;
+
+  try {
+    await LiveActivities.end({ activityId: activityId.value });
+    activityId.value = null;
+  } catch {
+    toast.error("Failed to end Live Activity");
+  } finally {
+    activityId.value = null;
+  }
 }
 </script>
 

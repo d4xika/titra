@@ -1,4 +1,6 @@
 class Api::UsersController < Api::ApplicationController
+  skip_forgery_protection only: [ :login, :register ]
+
   def login
     user = User.find_by(username: params[:username])
     if !user || !user.authenticate(params[:password])
@@ -11,12 +13,12 @@ class Api::UsersController < Api::ApplicationController
       value: auth_key.key,
       httponly: true,
       expires: 2.weeks.from_now,
-      path: '/',
+      path: "/",
       same_site: :lax,
       secure: Rails.env.production?
     })
 
-    return render json: authenticated_user_response(user), status: :ok
+    render json: authenticated_user_response(user, auth_key), status: :ok
   end
 
   def is_logged_in
@@ -28,15 +30,11 @@ class Api::UsersController < Api::ApplicationController
   end
 
   def logout
-    token = cookies[:auth_token]
-
-    if token
-      auth_record = AuthKey.find_by(key: token)
-      auth_record.destroy if auth_record
-    end
+    auth_record = bearer_auth_key || AuthKey.find_by(key: cookies[:auth_token])
+    auth_record&.destroy
 
     response.delete_cookie(:auth_token, {
-      path: '/',
+      path: "/",
       same_site: :lax,
       secure: Rails.env.production?
     })
@@ -55,25 +53,26 @@ class Api::UsersController < Api::ApplicationController
       value: auth_key.key,
       httponly: true,
       expires: 2.weeks.from_now,
-      path: '/',
+      path: "/",
       same_site: :lax,
       secure: Rails.env.production?
     })
 
-    return render json: authenticated_user_response(user), status: :created
+    render json: authenticated_user_response(user, auth_key), status: :created
   end
 
   private
 
   def render_user(user)
-    return {
+    {
       username: user.username
     }
   end
 
-  def authenticated_user_response(user)
+  def authenticated_user_response(user, auth_key)
     {
       **render_user(user),
+      auth_token: auth_key.key,
       csrf_token: form_authenticity_token
     }
   end

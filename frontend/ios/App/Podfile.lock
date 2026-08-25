@@ -1,7 +1,7 @@
 PODS:
-  - Capacitor (7.1.0):
+  - Capacitor (7.6.6):
     - CapacitorCordova
-  - CapacitorCordova (7.1.0)
+  - CapacitorCordova (7.6.6)
   - LiveActivities (0.0.1):
     - Capacitor
 
@@ -19,8 +19,8 @@ EXTERNAL SOURCES:
     :path: "../../live-activities"
 
 SPEC CHECKSUMS:
-  Capacitor: bceb785fb78f5e81e4a9e37843bc1c24bd9c7194
-  CapacitorCordova: 866217f32c1d25b326c568a10ea3ed0c36b13e29
+  Capacitor: 961efd309ab0e390a8081b63c561186f61a6714d
+  CapacitorCordova: 3a4e0027a89a59421c918d19aee9d6ba1c7a3556
   LiveActivities: b43a9489b3824aa1c5f8cbaeaace8fa1dbb2f963
 
 PODFILE CHECKSUM: b869c6b6b7576260c7af3b8cba1cf937f2d819fd

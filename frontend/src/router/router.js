@@ -1,5 +1,5 @@
 import { createWebHistory, createRouter } from "vue-router";
-import API from "@/helper/api.js";
+import API, { setAuthToken } from "@/helper/api.js";
 
 const routes = [
   {
@@ -70,6 +70,7 @@ export function setAuthStatus(status) {
   isAuthenticated = status;
   if (!status) {
     localStorage.removeItem("user");
+    setAuthToken(null);
     delete API.defaults.headers.common["X-CSRF-Token"];
   }
   isAuthChecked = status;

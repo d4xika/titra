@@ -1,15 +1,13 @@
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { LiveActivities } from "live-activities";
-import API from "@/helper/api.js";
+import API, { setAuthToken } from "@/helper/api.js";
 import { setAuthStatus } from "@/router/router.js";
 import TTDrawer from "@/components/misc/TTDrawer.vue";
 import { useTTToast } from "@/helper/useTTToast.js";
 
 const router = useRouter();
 const toast = useTTToast();
-const activityId = ref(null);
 const showLoginModal = ref(false);
 const showRegisterModal = ref(false);
 
@@ -18,24 +16,17 @@ const email = ref("");
 const password = ref("");
 const passwordRepeat = ref("");
 
-async function startLiveActivity() {
-  const res = await LiveActivities.start({
-    value: "1",
-  });
+function storeAuthentication(response) {
+  const {
+    auth_token: authToken,
+    csrf_token: csrfToken,
+    ...user
+  } = response.data;
 
-  activityId.value = res.activityId;
-  return res;
-}
-
-async function updateActivity() {
-  await LiveActivities.update({
-    activityId: activityId.value,
-    value: "40",
-  });
-}
-
-async function endActivity() {
-  await LiveActivities.end({ activityId: activityId.value });
+  setAuthToken(authToken);
+  API.defaults.headers.common["X-CSRF-Token"] = csrfToken;
+  localStorage.setItem("user", JSON.stringify(user));
+  setAuthStatus(true);
 }
 
 async function register() {
@@ -60,10 +51,7 @@ async function register() {
       email: email.value,
     });
 
-    API.defaults.headers.common["X-CSRF-Token"] =
-      registerResponse.data.csrf_token;
-    localStorage.setItem("user", JSON.stringify(registerResponse.data));
-    setAuthStatus(true);
+    storeAuthentication(registerResponse);
     toast.success("Account created. Welcome!");
     await router.push("/home");
   } catch (error) {
@@ -87,10 +75,7 @@ async function login() {
       password: password.value,
     });
 
-    API.defaults.headers.common["X-CSRF-Token"] =
-      loginResponse.data.csrf_token;
-    localStorage.setItem("user", JSON.stringify(loginResponse.data));
-    setAuthStatus(true);
+    storeAuthentication(loginResponse);
     toast.success("Welcome back!");
     await router.push("/home");
   } catch (error) {
@@ -119,13 +104,6 @@ async function login() {
       </p>
     </div>
   </div>
-
-  <!--
-  <button @click="startLiveActivity()">start activity</button>
-  <button @click="updateActivity()">update activity</button>
-  <button @click="endActivity()">end activity</button>
-
-  X {{ activityId }} X-->
 
   <TTDrawer title="Login" v-model="showLoginModal" show-divider>
     <template #body>
