@@ -1,8 +1,7 @@
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import API from "@/helper/api.js";
 import { useTTToast } from "@/helper/useTTToast.js";
-import * as loaders from "@primeuix/themes/aura/knob";
 
 const model = defineModel({ type: Boolean, default: false });
 const emit = defineEmits(["sessionAdded", "closeModal"]);
@@ -14,7 +13,9 @@ const duration = ref(0);
 const date = ref(new Date());
 const allProjects = ref([]);
 
-loadProjects();
+watch(model, (isOpen) => {
+  if (isOpen) loadProjects();
+});
 
 async function loadProjects() {
   try {
@@ -26,8 +27,6 @@ async function loadProjects() {
 }
 
 const filteredProjects = computed(() => {
-  loadProjects();
-
   const query = projectName.value.toLowerCase();
   if (!query) return allProjects.value;
 

@@ -21,7 +21,9 @@ const date = ref(null);
 const allProjects = ref([]);
 const confirmingDelete = ref(false);
 
-loadProjects();
+watch(model, (isOpen) => {
+  if (isOpen) loadProjects();
+});
 
 async function loadProjects() {
   try {
@@ -65,8 +67,6 @@ async function fetchProjectName(projectId) {
 }
 
 const filteredProjects = computed(() => {
-  loadProjects();
-
   const query = projectName.value.toLowerCase();
   if (!query) return allProjects.value;
 
