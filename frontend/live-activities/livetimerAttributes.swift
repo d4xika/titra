@@ -4,8 +4,9 @@ import SwiftUI
 
 struct livetimerAttributes: ActivityAttributes {
     public struct ContentState: Codable, Hashable {
-        // Dynamic stateful properties about your activity go here!
-        var value: String
+        var startedAt: Date
+        var endsAt: Date?
+        var countsDown: Bool
     }
     var name: String
 }

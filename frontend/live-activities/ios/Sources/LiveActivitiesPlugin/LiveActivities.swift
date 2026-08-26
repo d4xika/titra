@@ -14,13 +14,25 @@ public class LiveActivities {
             return
         }
 
-        // ContentState
-        let value = call.getString("value") ?? "default"
+        guard let startedAtMilliseconds = call.getDouble("startedAt") else {
+            call.reject("startedAt is required")
+            return
+        }
+
+        let startedAt = Date(timeIntervalSince1970: startedAtMilliseconds / 1000)
+        let endsAt = call.getDouble("endsAt").map {
+            Date(timeIntervalSince1970: $0 / 1000)
+        }
+        let countsDown = call.getBool("countsDown") ?? false
 
         Task {
             do {
                 let attributes = livetimerAttributes(name: "Live Timer")
-                let state = livetimerAttributes.ContentState(value: value)
+                let state = livetimerAttributes.ContentState(
+                    startedAt: startedAt,
+                    endsAt: endsAt,
+                    countsDown: countsDown
+                )
 
                 if #available(iOS 16.2, *) {
                     let activity = try Activity.request(
@@ -46,7 +58,16 @@ public class LiveActivities {
         }
 
         let activityId = call.getString("activityId") ?? ""
-        let value = call.getString("value") ?? "default value"
+        guard let startedAtMilliseconds = call.getDouble("startedAt") else {
+            call.reject("startedAt is required")
+            return
+        }
+
+        let startedAt = Date(timeIntervalSince1970: startedAtMilliseconds / 1000)
+        let endsAt = call.getDouble("endsAt").map {
+            Date(timeIntervalSince1970: $0 / 1000)
+        }
+        let countsDown = call.getBool("countsDown") ?? false
 
         Task {
             let activities = Activity<livetimerAttributes>.activities
@@ -55,7 +76,11 @@ public class LiveActivities {
                 return
             }
 
-            let newState = livetimerAttributes.ContentState(value: value)
+            let newState = livetimerAttributes.ContentState(
+                startedAt: startedAt,
+                endsAt: endsAt,
+                countsDown: countsDown
+            )
 
             await activity.update(.init(state: newState, staleDate: nil))
             call.resolve()

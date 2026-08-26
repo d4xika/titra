@@ -54,7 +54,6 @@ function startTimer() {
 
   intervalId.value = setInterval(() => {
     updateTimerDisplay();
-    updateActivity();
   }, 1000);
 }
 
@@ -165,6 +164,8 @@ onMounted(() => {
     timer.value.running = false;
     timer.value.display = formatElapsed(timer.value.elapsedBeforePause);
   }
+
+  activityId.value = localStorage.getItem("liveActivityId");
 });
 
 function handleSelectButtonUpdate(nextVal) {
@@ -180,25 +181,17 @@ async function startLiveActivity() {
 
   try {
     const res = await LiveActivities.start({
-      value: timer.value.display,
+      startedAt: timer.value.startTime,
+      endsAt:
+        timerSelection.value === "pi pi-hourglass"
+          ? timer.value.startTime + Number(countdownStartTime.value) * 60 * 1000
+          : null,
+      countsDown: timerSelection.value === "pi pi-hourglass",
     });
     activityId.value = res.activityId;
+    localStorage.setItem("liveActivityId", res.activityId);
   } catch {
     toast.error("Failed to start Live Activity");
-  }
-}
-
-async function updateActivity() {
-  if (!activityId.value) return;
-
-  try {
-    await LiveActivities.update({
-      activityId: activityId.value,
-      value: timer.value.display,
-    });
-  } catch {
-    activityId.value = null;
-    toast.error("Failed to update Live Activity");
   }
 }
 
@@ -208,10 +201,12 @@ async function endActivity() {
   try {
     await LiveActivities.end({ activityId: activityId.value });
     activityId.value = null;
+    localStorage.removeItem("liveActivityId");
   } catch {
     toast.error("Failed to end Live Activity");
   } finally {
     activityId.value = null;
+    localStorage.removeItem("liveActivityId");
   }
 }
 </script>

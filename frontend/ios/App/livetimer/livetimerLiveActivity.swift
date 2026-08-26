@@ -35,13 +35,29 @@ private struct WorkingKittyImage: View {
     }
 }
 
+private struct LiveTimerText: View {
+    let state: livetimerAttributes.ContentState
+    let fontSize: CGFloat
+
+    var body: some View {
+        Group {
+            if state.countsDown, let endsAt = state.endsAt {
+                Text(timerInterval: state.startedAt...endsAt, countsDown: true)
+            } else {
+                Text(timerInterval: state.startedAt...Date.distantFuture, countsDown: false)
+            }
+        }
+        .font(LiveActivityFont.chakraPetch(size: fontSize))
+        .monospacedDigit()
+    }
+}
+
 struct livetimerLiveActivity: Widget {
     var body: some WidgetConfiguration {
         ActivityConfiguration(for: livetimerAttributes.self) { context in
             // MARK: - Lock Screen / Banner UI
             HStack(alignment: .center) {
-                Text(context.state.value)
-                    .font(LiveActivityFont.chakraPetch(size: 48))
+                LiveTimerText(state: context.state, fontSize: 48)
                     .foregroundColor(.white)
 
                 Spacer()
@@ -60,8 +76,7 @@ struct livetimerLiveActivity: Widget {
             DynamicIsland {
                 // MARK: - Expanded UI
                 DynamicIslandExpandedRegion(.leading) {
-                    Text(context.state.value)
-                        .font(LiveActivityFont.chakraPetch(size: 35))
+                    LiveTimerText(state: context.state, fontSize: 35)
                         .padding(.leading, 10)
                 }
                 
@@ -75,8 +90,7 @@ struct livetimerLiveActivity: Widget {
                 }
                 
             } compactLeading: {
-                Text(context.state.value)
-                    .font(LiveActivityFont.chakraPetch(size: 16))
+                LiveTimerText(state: context.state, fontSize: 16)
                     .foregroundColor(.white)
             } compactTrailing: {
                 WorkingKittyImage(
@@ -85,8 +99,7 @@ struct livetimerLiveActivity: Widget {
                     height: 25
                 )
             } minimal: {
-                Text(context.state.value)
-                    .font(LiveActivityFont.chakraPetch(size: 12))
+                LiveTimerText(state: context.state, fontSize: 12)
             }
             .widgetURL(URL(string: "http://www.apple.com"))
             .keylineTint(Color.white)

@@ -13,25 +13,66 @@ npx cap sync
 
 <docgen-index>
 
-* [`echo(...)`](#echo)
+* [`start(...)`](#start)
+* [`update(...)`](#update)
+* [`end(...)`](#end)
+* [Interfaces](#interfaces)
 
 </docgen-index>
 
 <docgen-api>
 <!--Update the source file JSDoc comments and rerun docgen to update the docs below-->
 
-### echo(...)
+### start(...)
 
 ```typescript
-echo(options: { value: string; }) => Promise<{ value: string; }>
+start(options: TimerState) => Promise<{ activityId: string; }>
 ```
 
-| Param         | Type                            |
-| ------------- | ------------------------------- |
-| **`options`** | <code>{ value: string; }</code> |
+| Param         | Type                                              |
+| ------------- | ------------------------------------------------- |
+| **`options`** | <code><a href="#timerstate">TimerState</a></code> |
 
-**Returns:** <code>Promise&lt;{ value: string; }&gt;</code>
+**Returns:** <code>Promise&lt;{ activityId: string; }&gt;</code>
 
 --------------------
+
+
+### update(...)
+
+```typescript
+update(options: TimerState & { activityId: string; }) => Promise<void>
+```
+
+| Param         | Type                                                                        |
+| ------------- | --------------------------------------------------------------------------- |
+| **`options`** | <code><a href="#timerstate">TimerState</a> & { activityId: string; }</code> |
+
+--------------------
+
+
+### end(...)
+
+```typescript
+end(options: { activityId: string; }) => Promise<void>
+```
+
+| Param         | Type                                 |
+| ------------- | ------------------------------------ |
+| **`options`** | <code>{ activityId: string; }</code> |
+
+--------------------
+
+
+### Interfaces
+
+
+#### TimerState
+
+| Prop             | Type                        |
+| ---------------- | --------------------------- |
+| **`startedAt`**  | <code>number</code>         |
+| **`endsAt`**     | <code>number \| null</code> |
+| **`countsDown`** | <code>boolean</code>        |
 
 </docgen-api>

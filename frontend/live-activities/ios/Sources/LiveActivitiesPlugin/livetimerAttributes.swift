@@ -1,12 +1,12 @@
 import ActivityKit
-import WidgetKit
-import SwiftUI
+import Foundation
 
 struct livetimerAttributes: ActivityAttributes {
-    public struct ContentState: Codable, Hashable {
+    struct ContentState: Codable, Hashable {
         var startedAt: Date
         var endsAt: Date?
         var countsDown: Bool
     }
+
     var name: String
 }
