@@ -2,6 +2,15 @@
 
 **titra** means **time tracker** ⏱️. It is a friendly stopwatch and countdown app for recording work sessions, organizing them by project, and keeping the current timer visible through iOS Live Activities.
 
+## Screenshots 📸
+
+<p align="center">
+  <img src="frontend/docs/Screenshots/mockup-timer.png" alt="Stopwatch timer running in titra" width="24%">
+  <img src="frontend/docs/Screenshots/mockup-sessions.png" alt="Weekly session history in titra" width="24%">
+  <img src="frontend/docs/Screenshots/mockup-projects.png" alt="Project management in titra" width="24%">
+  <img src="frontend/docs/Screenshots/mockup-liveactivity.png" alt="titra timer shown as an iOS Live Activity" width="24%">
+</p>
+
 ## Features 🪄
 
 - Count-up stopwatch and configurable countdown timer
