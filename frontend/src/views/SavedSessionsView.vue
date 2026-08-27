@@ -126,6 +126,7 @@ async function showProjectTime() {
     const queryParams = new URLSearchParams({
       time_window: timeWindowSelection.value,
       date: currentReferenceDate.value.toISOString(),
+      timezone_offset: currentReferenceDate.value.getTimezoneOffset(),
     });
 
     if (projectId) {
@@ -175,6 +176,7 @@ async function fetchSessions(reset = false) {
       offset: offset,
       time_window: timeWindowSelection.value,
       date: currentReferenceDate.value.toISOString(),
+      timezone_offset: currentReferenceDate.value.getTimezoneOffset(),
     });
 
     if (projectId) {

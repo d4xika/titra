@@ -11,7 +11,7 @@ class Api::SessionsController < Api::ApplicationController
 
     if params[:time_window].present? && params[:time_window] != "ALL"
 
-      ref_date = params[:date].present? ? Time.zone.parse(params[:date]) : Time.current
+      ref_date = reference_date
 
       case params[:time_window]
       when "D"
@@ -68,7 +68,7 @@ class Api::SessionsController < Api::ApplicationController
     end
 
     if params[:time_window].present? && params[:time_window] != 'ALL'
-      ref_date = params[:date].present? ? Time.zone.parse(params[:date]) : Time.current
+      ref_date = reference_date
 
       case params[:time_window]
       when 'D'
@@ -88,6 +88,15 @@ class Api::SessionsController < Api::ApplicationController
   end
 
   private
+
+  def reference_date
+    ref_date = params[:date].present? ? Time.zone.parse(params[:date]) : Time.current
+    offset = Integer(params[:timezone_offset], exception: false)
+
+    return ref_date unless offset&.between?(-840, 840)
+
+    Time.at(ref_date.to_f).getlocal(-offset * 60)
+  end
 
   def find_session
     current_user.sessions.find(params[:id])
