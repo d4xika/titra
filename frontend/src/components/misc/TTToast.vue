@@ -46,6 +46,10 @@ function getMessage(message) {
   max-width: 80vw !important;
 }
 
+.p-toast-top-right {
+  top: var(--safe-area-top) !important;
+}
+
 .p-toast .p-toast-message-info {
   background-color: var(--primary-color-light) !important;
   border: 1px solid var(--white) !important;
