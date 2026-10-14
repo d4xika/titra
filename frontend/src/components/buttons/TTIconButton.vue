@@ -8,12 +8,28 @@ const props = defineProps({
     default: "square",
     validator: (value) => ["circle", "plain", "square"].includes(value),
   },
+  loading: {
+    type: Boolean,
+    default: false,
+  },
+  disabled: {
+    type: Boolean,
+    default: false,
+  },
 });
 </script>
 
 <template>
-  <div class="buttonContainer" :class="`variant-${props.variant}`">
-    <i :class="props.icon"></i>
+  <div
+    class="buttonContainer"
+    :class="[
+      `variant-${props.variant}`,
+      { disabled: props.disabled || props.loading },
+    ]"
+    :aria-busy="props.loading"
+  >
+    <i v-if="props.loading" class="pi pi-spin pi-spinner"></i>
+    <i v-else-if="props.icon" :class="props.icon"></i>
     <slot></slot>
   </div>
 </template>
@@ -32,6 +48,12 @@ const props = defineProps({
   transition:
     transform 0.3s ease,
     box-shadow 0.3s ease;
+
+  &.disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
 
   &.variant-square {
     border-radius: var(--border-radius-2);

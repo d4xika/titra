@@ -11,6 +11,7 @@ const timerSelection = ref("pi pi-stopwatch");
 const selectButtonKey = ref(0);
 const countdownStartTime = ref(null);
 const sessionId = ref(null);
+const isStopping = ref(false);
 const toast = useTTToast();
 
 const timer = ref({
@@ -48,6 +49,8 @@ function startTimer() {
   localStorage.setItem("timerStartTime", timer.value.startTime);
   localStorage.setItem("timerRunning", "true");
   localStorage.setItem("elapsedBeforePause", timer.value.elapsedBeforePause);
+  localStorage.setItem("timerSelection", timerSelection.value);
+  localStorage.setItem("countdownStartTime", countdownStartTime.value ?? "");
 
   updateTimerDisplay();
   startLiveActivity();
@@ -86,9 +89,12 @@ function resetTimer() {
   localStorage.removeItem("timerStartTime");
   localStorage.removeItem("elapsedBeforePause");
   localStorage.removeItem("timerRunning");
+  localStorage.removeItem("timerSelection");
+  localStorage.removeItem("countdownStartTime");
 }
 
 async function stopTimer() {
+  if (isStopping.value) return;
   if (!timer.value.running && timer.value.elapsedBeforePause <= 0) {
     toast.info("Start the timer before saving a session.");
     return;
@@ -97,6 +103,8 @@ async function stopTimer() {
   if (timer.value.running) {
     pauseTimer();
   }
+
+  isStopping.value = true;
 
   try {
     const startTime = timer.value.startTime
@@ -116,21 +124,26 @@ async function stopTimer() {
     timer.value.finished = true;
   } catch (error) {
     toast.apiError(error, "Could not save the timed session.");
+  } finally {
+    isStopping.value = false;
   }
 }
 
 function updateTimerDisplay() {
   if (timer.value.running && timer.value.startTime) {
-    const elapsed = Math.floor((Date.now() - timer.value.startTime) / 1000);
-    timer.value.elapsedBeforePause = elapsed;
+    let elapsed = Math.floor((Date.now() - timer.value.startTime) / 1000);
 
     if (timerSelection.value === "pi pi-hourglass") {
+      // app may wake up long after the countdown ended; don't overshoot
+      elapsed = Math.min(elapsed, Math.round(countdownStartTime.value * 60));
+      timer.value.elapsedBeforePause = elapsed;
       const countdown = countdownStartTime.value * 60 - elapsed;
       timer.value.display = formatElapsed(countdown);
       if (countdown <= 0) {
         stopTimer();
       }
     } else {
+      timer.value.elapsedBeforePause = elapsed;
       timer.value.display = formatElapsed(elapsed);
     }
 
@@ -150,6 +163,10 @@ onMounted(() => {
   const savedElapsed = localStorage.getItem("elapsedBeforePause");
 
   timer.value.elapsedBeforePause = savedElapsed ? parseInt(savedElapsed) : 0;
+  timerSelection.value =
+    localStorage.getItem("timerSelection") ?? timerSelection.value;
+  countdownStartTime.value =
+    localStorage.getItem("countdownStartTime") || countdownStartTime.value;
 
   if (wasRunning && savedStartTime) {
     timer.value.startTime = parseInt(savedStartTime);
@@ -162,7 +179,11 @@ onMounted(() => {
     updateTimerDisplay();
   } else {
     timer.value.running = false;
-    timer.value.display = formatElapsed(timer.value.elapsedBeforePause);
+    const remaining =
+      timerSelection.value === "pi pi-hourglass"
+        ? countdownStartTime.value * 60 - timer.value.elapsedBeforePause
+        : timer.value.elapsedBeforePause;
+    timer.value.display = formatElapsed(remaining);
   }
 
   activityId.value = localStorage.getItem("liveActivityId");
@@ -257,14 +278,28 @@ async function endActivity() {
       </div>
 
       <div class="button-container">
-        <TTIconButton @click="timer.reset = true" icon="pi pi-replay" />
         <TTIconButton
+          :disabled="isStopping"
+          @click="timer.reset = true"
+          icon="pi pi-replay"
+        />
+        <TTIconButton
+          :disabled="isStopping"
           @click="pauseTimer"
           v-if="timer.running"
           icon="pi pi-pause"
         />
-        <TTIconButton @click="startTimer" v-else icon="pi pi-play" />
-        <TTIconButton @click="stopTimer" icon="pi pi-stop" />
+        <TTIconButton
+          :disabled="isStopping"
+          @click="startTimer"
+          v-else
+          icon="pi pi-play"
+        />
+        <TTIconButton
+          :loading="isStopping"
+          @click="stopTimer"
+          icon="pi pi-stop"
+        />
       </div>
     </div>
   </div>
@@ -292,7 +327,7 @@ async function endActivity() {
   .list-button {
     position: fixed;
     left: 2rem;
-    top: max(2rem, var(--safe-area-top));
+    top: max(3rem, var(--safe-area-top));
   }
 
   .main-container {

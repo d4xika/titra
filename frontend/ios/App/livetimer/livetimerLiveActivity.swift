@@ -44,7 +44,7 @@ private struct LiveTimerText: View {
             if state.countsDown, let endsAt = state.endsAt {
                 Text(timerInterval: state.startedAt...endsAt, countsDown: true)
             } else {
-                Text(timerInterval: state.startedAt...Date.distantFuture, countsDown: false)
+                Text(state.startedAt, style: .timer)
             }
         }
         .font(LiveActivityFont.chakraPetch(size: fontSize))
@@ -92,6 +92,8 @@ struct livetimerLiveActivity: Widget {
             } compactLeading: {
                 LiveTimerText(state: context.state, fontSize: 16)
                     .foregroundColor(.white)
+                    .frame(maxWidth: 40, alignment: .leading)
+                    .minimumScaleFactor(0.8)
             } compactTrailing: {
                 WorkingKittyImage(
                     name: "workingKittyCompact",

@@ -432,13 +432,13 @@ function logout() {
   .home-button {
     position: fixed;
     left: 2rem;
-    top: max(2rem, var(--safe-area-top));
+    top: max(3rem, var(--safe-area-top));
   }
 
   .logout-button {
     position: fixed;
     right: 2rem;
-    top: max(2rem, var(--safe-area-top));
+    top: max(3rem, var(--safe-area-top));
   }
 
   .time-windows :deep(.p-togglebutton) {

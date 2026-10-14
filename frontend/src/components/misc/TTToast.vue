@@ -47,7 +47,7 @@ function getMessage(message) {
 }
 
 .p-toast-top-right {
-  top: var(--safe-area-top) !important;
+  top: calc(var(--safe-area-top) + var(--gap-3)) !important;
 }
 
 .p-toast .p-toast-message-info {

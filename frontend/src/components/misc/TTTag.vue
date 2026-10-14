@@ -33,7 +33,7 @@ const props = defineProps({
   padding: 2px var(--gap-2);
   border-radius: var(--border-radius-1-5);
   width: fit-content;
-  font-weight: 600;
+  font-weight: 500;
 
   &.color-blue {
     background-color: var(--primary-color-transparent);

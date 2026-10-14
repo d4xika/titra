@@ -24,7 +24,7 @@ const props = defineProps({
   align-items: center;
   border-radius: var(--border-radius-2);
   width: fit-content;
-  padding: 0 var(--gap-3);
+  padding: 0 var(--gap-4);
   cursor: pointer;
   transition:
     transform 0.3s ease,
