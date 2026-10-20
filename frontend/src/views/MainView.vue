@@ -327,7 +327,7 @@ async function endActivity() {
   .list-button {
     position: fixed;
     left: 2rem;
-    top: max(3rem, var(--safe-area-top));
+    top: max(2rem, var(--safe-area-top));
   }
 
   .main-container {
